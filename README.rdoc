@@ -1,0 +1,191 @@
+== Introduction
+
+This is the first version of the 'ENCRE project' videochat
+component. It is currently in alpha stage and still lacks of tons of
+features but it's a good starting point for distribution developper to
+start interact with a red5 server, ActionScript code and the API.
+
+This repository (on GitHub) is the reference regarding code and
+documentation of the videochat component.
+
+=== Outside the box
+
+This small paragraph is intented for people who are not member of the
+ENCRE project (a french project aimed at easing meetings).  On this
+repository you will find a simple Red5 based video conferencing system
+which aims are simplicity, limited use of flash technologies and ease
+of integration into REST-based web applications.
+
+=== Important notes
+
+This code is developped on Ubuntu and Debian systems so most of the
+documentation will be done from the point of view of these
+distributions. Translating from these distributions to another should
+not be to hard provided you have some knowledge of the source and
+destinations systems.
+
+This server-side component is not and will not be tested on Win32/64
+and OSX systems, althought it might work on these platforms without
+much changes.
+
+The ActionScript code contained in this repository is given as an
+example and for demonstration and testing purposes only. Support will
+be provided on it whenever possible but it is not officialy part of
+this component.
+
+== Directory layout and important files
+
+[./] Root of the project
+[./README.rdoc] This file.
+[./WEB-INF/] Red5 Application code folder, see the _Application_ subsection.
+[./tools/] Contains tools which might help you (or not) running the server. See the _Tools_ subsection.
+[./flash/] Contains an example of client of the component with flash
+           code and a riny webapp for launching flash widgets, see the _Flash_ subsection.
+
+== Installation
+
+In this section i will explain, using a step-by-step procedure, how to
+install the component on you workstation/server, allowing you to start
+playing with it, integrating it and understanding its API.
+
+=== Prerequisites
+
+As stated earlier, i recommend following this procedure on an recent
+Ubuntu or Debian distributions. Adapting the procedure to another
+distribution shouldn't be too hard but for the first time, try to use
+the recommended environment and settings.
+
+==== Software and libraries.
+
+Before starting to follow the installation guide, check you have the
+following packages installed on your system and install them if you
+don't:
+
+* A JDK 1.6 (I will assume OpenJDK (openjdk-6-jdk) through the rest of this guide.)
+* ant
+* git-core
+* build-essential (iirc, it is only for GNU Make)
+* unzip
+* !sqlite3
+* !libsqlite3-0
+* !libsqlite3-dev
+* ruby1.8
+* ruby1.8-dev
+* rubygems1.8
+* The following ruby gems (install using `gem install xxx`)
+  * gemcutter
+  * sinatra
+  * haml
+  * json
+  * rest-client
+  * !sqlite3-ruby
+  * mongrel
+* jruby
+* The following jruby gems (install using `jruby -S gem install xxx`)
+  * rest-client
+  * json_pure
+  * jruby-openssl
+  * !jdbc-sqlite3
+  * !activerecord-jdbcsqlite3-adapter
+  * !activerecord-jdbc-adapter
+  * !activerecord
+* The latest stable OpenSource Flex SDK from Adobe (http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+4)
+* Your favorite text editor
+
+=== Red5
+
+The component use jruby and the ability of the Red5 server to load and
+run Ruby code in order to ease development of the component. This is
+somewhat tricky to setup because in the recent binary release of Red5
+it seems that there are some required java archives (jar) missing. Due
+to this, the current recommended way of installing the Red5 server is
+to use the provided archive.
+
+You could find this archive here : http://github.com/epitech-labfree/encrev1/downloads
+
+=== Setup guide
+
+(Open a terminal, this guide assumes a bash compatible shell)
+
+==== Installing Red5 and Flex
+
+Fetch and unpack the Red5 server binary release into a folder of you
+choice. Then define the RED5_HOME environment variable to the path
+of the red5 folder
+
+  $ cd ~/encre_video && tar xzf red5-x.y.z-encre.tar.gz && export RED5_HOME=~/encre_video/red5-x.y.z/
+
+Fetch and unpack the OpenSource Flex SDK, then define the FLEX_HOME
+environment variable to the path of the flex sdk folder
+
+  $ mkdir ~/encre_video/flex && cd ~/encre_video/flex && unzip ../flex_sdk_x.y.zip && export FLEX_HOME=~/encre_video/flex
+
+==== Fetching and deploying the encre red5 application
+
+Grab the latest source of the video component (this repository). The
+following command should create you a encrev1 folder in ~/encre_video
+containing the latest source. You could update it later by issuing the
+command `git pull origin master`
+
+  $ cd ~/encre_video && git clone git://github.com/epitech-labfree/encrev1.git
+
+Install the videochat component into the Red5 Server by creating a
+symlink to the encrev1 folder in the red5 webapps subfolder.
+
+  $ ln -s ~/encre_video/encrev1 ~/encre_video/red5-x.y.z/webapps
+
+You could now test that these parts are correctly installed
+
+  $ cd ~/encre_video/red5-x.y.z/ && ./red5.sh
+
+Don't worry about the "warning: could not compile: because of:
+"Illegal class name "" in class file ", this is a known Spring bug (a
+framework Red5 uses). If you see the following message : "Initializing
+ENCRE VideoChat v1....  ..Done", the application has been successfully
+installed.
+
+Note that you could use the JAVA_OPTS environment variable to pass
+option to the Java VM, these one could be helpfull :
+* -Djruby.jit.logging.verbose=true gives a more verbose output from Jruby inside Red5
+* -client speeds up the start of Red5 by not compiling everything but slows the average speed of the server (usefull for tests.)
+
+==== Running the Encre Platform Mock
+
+Since the encre platform and especially the video api is not yet
+finished and available and because it could be handy for testing and
+development purpose, a small mock has been developped for the Encre
+Platform. It is a small web application that reproduces the (expected)
+behavior of the Core of the encre platform. It is currently needed if
+you want to user the videochat component. Tu run it, open another term
+and issue the following command:
+
+  $ cd ~/encre_video/encrev1/tools/ && ruby encre-platform-mock.rb
+
+==== Building and running the demo client
+
+Code is sometimes more helpfull to developpers than tons of pages of
+documentations and specifications. Following this principle, an
+example of flash widgets supporting the api and of a small web
+application powering it is provided. These will be maintained in sync
+with the current state of the code and of the specification.
+
+In order to build the flash/flex clients, please check the flex sdk is
+correctly setup and you have set the FLEX_HOME env variable
+accordingly then run:
+
+  $ cd ~/encre_video/encrev1/flash && make
+
+Finally run it with:
+
+  $ cd ~/encre_video/encrev1/flash && ruby flv_server.rb -p 1234
+
+==== Using the examples
+
+Check that Red5, Encre Platform Mock and example server are running.
+You could now open your flash-enabled browser and go to http://localhost:1234
+
+
+== Components
+=== The Red5 Application
+=== The Tools
+=== The flash code

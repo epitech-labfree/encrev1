@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rtmpy:ReceiveVideo xmlns:mx="http://www.adobe.com/2006/mxml"
+					xmlns:rtmpy="org.rtmpy.examples.simple.receiveVideo.*"
+					layout="absolute"
+					paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+	<mx:Style>
+		.buttonplay {
+			up-skin: Embed(source="control_play.png");
+			over-skin: Embed(source="control_play.png");
+			down-skin: Embed(source="control_play.png");
+		}
+		.buttonpause {
+			up-skin: Embed(source="control_pause.png");
+			over-skin: Embed(source="control_pause.png");
+			down-skin: Embed(source="control_pause.png");
+		}
+		.buttonstop {
+			up-skin: Embed(source="control_stop.png");
+			over-skin: Embed(source="control_stop.png");
+			down-skin: Embed(source="control_stop.png");
+		}
+		.buttonstart {
+			up-skin: Embed(source="control_start.png");
+			over-skin: Embed(source="control_start.png");
+			down-skin: Embed(source="control_start.png");
+		}
+		.buttonaudioon {
+			up-skin: Embed(source="sound.png");
+			over-skin: Embed(source="sound.png");
+			down-skin: Embed(source="sound.png");
+		}
+		.buttonaudiooff {
+			up-skin: Embed(source="sound_mute.png");
+			over-skin: Embed(source="sound_mute.png");
+			down-skin: Embed(source="sound_mute.png");
+		}
+		.buttonvideoon {
+			up-skin: Embed(source="webcam.png");
+			over-skin: Embed(source="webcam.png");
+			down-skin: Embed(source="webcam.png");
+		}
+		.buttonvideooff {
+			up-skin: Embed(source="webcam_error.png");
+			over-skin: Embed(source="webcam_error.png");
+			down-skin: Embed(source="webcam_error.png");
+		}
+		
+	</mx:Style>
+	
+	<mx:VBox verticalAlign="top" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+	  <mx:HBox id="box" width="100%" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+		<mx:UIComponent id="videoPanel"/>
+		<mx:VBox height="100%" verticalAlign="top" paddingLeft="0" paddingRight="0" paddingTop="5" paddingBottom="0">
+			<mx:Button id="button_audio" label="" toolTip="Mute"
+				styleName="buttonaudioon" click="audio_toggle()" />
+			<mx:Button id="button_video" label="" toolTip="Video Off"
+				styleName="buttonvideoon" click="video_toggle()" />
+			<mx:VSlider id="volume" width="16" height="40" dataTipPrecision="0" toolTip="Volume"/>
+			<mx:Button visible="false" height="0" id="button_playstop" label="" toolTip="Stop"
+				styleName="buttonstop" click="playstop_toggle()" />
+			<mx:Button visible="false" height="0" id="button_pausestart" label="" toolTip="Pause"
+				styleName="buttonpause" click="pausestart_toggle()" />
+<!--	doesn't work properly, allowing buffer time to change during playback.  oops.
+		<mx:VSlider id="buffer" width="16" height="30" toolTip="Video Buffer (seconds)"/> -->
+		</mx:VBox>
+	  </mx:HBox>
+      <mx:HSlider thumbPress="start_scrub()" thumbRelease="stop_scrub()"
+      	          visible="false" id="position" width="100%" height="0"
+      	          showDataTip="true" toolTip="Playback" click="scrubVideo(event)"/>
+	</mx:VBox>
+	
+</rtmpy:ReceiveVideo>

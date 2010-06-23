@@ -1,0 +1,34 @@
+!!!
+%html
+  %head
+    %title evv1 : publish
+    %link(rel='icon' type='image/png' href='/favicon.png')
+    %link(rel='stylesheet' type='text/css' href='history/history.css')
+    %script(src='AC_OETags.js' language='javascript')
+    %script(src='history/history.js' language='javascript')
+    %style body { margin: 0px; overflow:hidden }
+  %body
+    %h1= "Publishing audio/video stream on #{params[:server]}/#{params[:room]}/#{params[:id]} (token: #{params[:token]})"
+    #flash
+      %noscript
+        %object(classid='clsid:D27CDB6E-AE6D-11cf-96B8-444553540000' id='vidpublish')
+          %param
+          %param(name='quality' value='high')
+          %param(name='server' value="#{params[:server]}")
+          %embed(src="vidpublish.swf?streamtype=live&server=#{@full_url}&token=#{params[:token]}")
+
+    :javascript
+      AC_FL_RunContent(
+      "src", "publish_video?stream=#{params[:id]}&streamtype=live&server=#{@full_url}&width=640&height=480&token=#{params[:token]}",
+      "flashvars", "stream=#{params[:id]}&streamtype=live&server=#{@full_url}&width=640&height=480&token=#{params[:token]}",
+      "width", "100%",
+      "height", "100%",
+      "align", "middle",
+      "id", "vidpublish",
+      "quality", "100",
+      "bgcolor", "#869ca7",
+      "name", "vidpublish",
+      "type", "application/x-shockwave-flash",
+      "pluginspage", "http://www.adobe.com/go/getflashplayer"
+      );
+

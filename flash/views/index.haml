@@ -1,0 +1,34 @@
+!!!
+%html
+  %head
+    %title Exemples du composant video encrev1 0.1
+    %link(rel='icon' type='image/png' href='/favicon.png')
+  %body
+    %h1 Exemples du composant "videochatv1"  0.1
+
+    %h2 View a stream
+    #form
+      %form(action='/view' method='GET')
+        %span Serveur:
+        %input(type='text' name='server' value='rtmp://localhost/encrev1')
+        %span Room:
+        %input(type='text' name='room' size='15' value='room1')
+        %span id:
+        %input(type='text' name='id' size='3' value='1')
+        %span Token:
+        %input(type='text' name='token' value='token1')
+        %input(type='submit' value='Voir !')
+
+    %h2 Publish a stream
+    #form
+      %form(action='/publish' method='GET')
+        %span Serveur:
+        %input(type='text' name='server' value='rtmp://localhost/encrev1')
+        %span Room:
+        %input(type='text' name='room' size='15' value='room1')
+        %span id:
+        %input(type='text' name='id' size='3' value='1')
+        %span Token:
+        %input(type='text' name='token' value='token1')
+        %input(type='submit' value='Publier !')
+

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rtmpy:VidPublish xmlns:mx="http://www.adobe.com/2006/mxml"
+					xmlns:rtmpy="org.rtmpy.examples.simple.vidPublish.*"
+					paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+	<mx:Style>
+		.buttonaudioon {
+			up-skin: Embed(source="sound.png");
+			over-skin: Embed(source="sound.png");
+			down-skin: Embed(source="sound.png");
+		}
+		.buttonaudiooff {
+			up-skin: Embed(source="sound_mute.png");
+			over-skin: Embed(source="sound_mute.png");
+			down-skin: Embed(source="sound_mute.png");
+		}
+		.buttonvideoon {
+			up-skin: Embed(source="webcam.png");
+			over-skin: Embed(source="webcam.png");
+			down-skin: Embed(source="webcam.png");
+		}
+		.buttonvideooff {
+			up-skin: Embed(source="webcam_error.png");
+			over-skin: Embed(source="webcam_error.png");
+			down-skin: Embed(source="webcam_error.png");
+		}
+		
+	</mx:Style>
+	
+	<mx:HBox id="box" width="100%" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+		<mx:UIComponent id="videoHolder"/>
+		<mx:VBox height="100%" verticalAlign="top" paddingLeft="0" paddingRight="0" paddingTop="5" paddingBottom="0">
+			<mx:Button id="button_audio" label="" toolTip="Audio Off"
+				styleName="buttonaudioon" click="audio_toggle()" />
+			<mx:Button id="button_video" label="" toolTip="Video Off"
+				styleName="buttonvideoon" click="video_toggle()" />
+			<mx:VSlider id="volume" width="16" height="40" dataTipPrecision="0" toolTip="Volume"/>
+		</mx:VBox>	
+	</mx:HBox>
+</rtmpy:VidPublish>

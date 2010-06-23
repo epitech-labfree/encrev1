@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.7.1
+Created-By: 14.2-b01 (Sun Microsystems Inc.)
+Built: 7-January-2010 by Paul
+Build-OS: Windows 7 6.1
+Build-Java: Java 1.6.0_16
+

@@ -31,6 +31,7 @@ require 'rubygems'
 #
 # FIXME, find a better way to find the required classes
 #
+puts ENV['RED5_HOME'] + "/webapps/encrev1/WEB-INF/classes/applications/"
 $:.unshift ENV['RED5_HOME'] + "/webapps/encrev1/WEB-INF/classes/applications/"
 require 'encre_auth'
 
@@ -56,14 +57,14 @@ class Application < Red5::ApplicationAdapter
     #call super to init the superclass, in this case a Java class
     super
     puts "Initializing ENCRE VideoChat v1..."
-    @auth = Encre::Auth.new
+    @encre = Encre::Platform::connect
   end
 
   def appStart(app)
     puts "...Done."
     @appScope = app
 
-    @auth.server(app) != nil
+    @encre.auth.server(app) != nil
   end
 
   def appConnect(conn, params)
@@ -86,7 +87,7 @@ class Application < Red5::ApplicationAdapter
       # conn.setBandwidthConfigure(sbc)
     end
 
-    if @auth.connection(conn, params)
+    if @encre.auth.connection(conn, params)
       super(conn, params)
     else
       false
@@ -104,7 +105,7 @@ class Application < Red5::ApplicationAdapter
   def roomJoin(client, scope)
     puts "Room Join. (#{scope.get_name})"
 
-    @auth.join(client, scope)
+    @encre.auth.join(client, scope)
   end
 
   def toString

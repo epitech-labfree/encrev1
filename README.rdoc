@@ -61,6 +61,9 @@ Before starting to follow the installation guide, check you have the
 following packages installed on your system and install them if you
 don't:
 
+(All the items in the list that starts with an ! are not currently
+required but will soon be. They are here as a reminder)
+
 * A JDK 1.6 (I will assume OpenJDK (openjdk-6-jdk) through the rest of this guide.)
 * ant
 * git-core
@@ -71,8 +74,9 @@ don't:
 * !libsqlite3-dev
 * ruby1.8
 * ruby1.8-dev
+* ruby
 * rubygems1.8
-* The following ruby gems (install using `gem install xxx`)
+* The following ruby gems (install using `gem install xxx` (as root))
   * gemcutter
   * sinatra
   * haml
@@ -81,7 +85,7 @@ don't:
   * !sqlite3-ruby
   * mongrel
 * jruby
-* The following jruby gems (install using `jruby -S gem install xxx`)
+* The following jruby gems (install using `jruby -S gem install xxx` (as the user who will run the red5 server))
   * rest-client
   * json_pure
   * jruby-openssl
@@ -177,7 +181,7 @@ accordingly then run:
 
 Finally run it with:
 
-  $ cd ~/encre_video/encrev1/flash && ruby flv_server.rb -p 1234
+  $ cd ~/encre_video/encrev1/flash && ruby flash_widgets_server.rb -p 1234
 
 ==== Using the examples
 
@@ -187,5 +191,43 @@ You could now open your flash-enabled browser and go to http://localhost:1234
 
 == Components
 === The Red5 Application
+
+This is mainly the code you will find here. This is the main part of the videochat component. It is responsible of managing the chat rooms and their streams. It (will) perform the control and authorization as well as the recording of the video streams.
+
 === The Tools
+
+The tool section currently only contains a mock for the Encre Platform, reproducing its expected behavior regarding auth and event passing. You can configure it simply by editing the encre-platform-mock.rb file to specify which token are authorized to do what and what do do when receiving events.
+
+Currently, you have to run the encre-platform-mock.rb script to allow the red5 application to start. If you don't, the application won't be able to authorize itself nor the clients connections and actions and will simply refuse to start.
+
 === The flash code
+
+The flash folder contains examples web application and flash widgets
+codes to help distributors and integrators to work with the videochat.
+
+The widget folder contains two sample flash widgets implementing the
+(currently very simple) encre video auth api:
+* receive_video contains a simple player which will authorized itself on the red5 application and display the stream on the server you provided as parameters.
+* publish_video authorized itself and then publish the stream at the place provided as parameter.
+
+Finaly, the small flash_widgets_server.rb web application simply
+provides forms to instanciate flash widgets with the correct
+parameters. It is kind of the simplest ditribution using the videochat
+component you could imagine.
+
+== Common Errors
+
+In this section, most common error will be listed along with their
+solutions. As java error can be very (very) long and especially when
+the problematic code is executed in an application server, only the
+characteristic portion of the error will be given. It's up to you to
+find it! (It's generally a good idea to start reading the stack trace
+from the end)
+
+[no such file to load -- 'encre_auth'] The $RED_HOME environment variable is not properly set or you are not running the red5*sh scripts from the red5 directory.
+[no such file to load -- 'rest_client' or 'json'] The rest-client or json_pure gems are not installed or where not installed by the user who runs the applications (jruby gems are installed in ~/.gem/jruby, and on debian the systems gems are not where jruby expects them).
+
+
+
+
+

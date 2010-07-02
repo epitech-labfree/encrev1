@@ -31,7 +31,7 @@ require 'rubygems'
 #
 # FIXME, find a better way to find the required classes
 #
-puts ENV['RED5_HOME'] + "/webapps/encrev1/WEB-INF/classes/applications/"
+#puts ENV['RED5_HOME'] + "/webapps/encrev1/WEB-INF/classes/applications/"
 $:.unshift ENV['RED5_HOME'] + "/webapps/encrev1/WEB-INF/classes/applications/"
 require 'encre_auth'
 
@@ -48,7 +48,9 @@ end
 #
 # @author Julien BALLET (EPITECH-Labfree), based on the work of Paul Gregoire
 #
-class Application < Red5::ApplicationAdapter
+
+class Application < Red5::MultiThreadedApplicationAdapter
+  #include Red5::IStreamAwareScopeHandler
 
   attr_reader :appScope, :serverStream
   attr_writer :appScope, :serverStream
@@ -56,6 +58,7 @@ class Application < Red5::ApplicationAdapter
   def initialize
     #call super to init the superclass, in this case a Java class
     super
+
     puts "Initializing ENCRE VideoChat v1..."
     @encre = Encre::Platform::connect
   end
@@ -63,6 +66,15 @@ class Application < Red5::ApplicationAdapter
   def appStart(app)
     puts "...Done."
     @appScope = app
+
+    registerStreamPlaybackSecurity do |scope, name, start, len, flush|
+      @encre.auth.stream_watch scope, name, start, len, flush
+    end
+    registerStreamPublishSecurity do |scope, name, mode|
+      @encre.auth.stream_publish scope, name, mode
+    end
+
+    super
 
     @encre.auth.server(app) != nil
   end
@@ -88,6 +100,7 @@ class Application < Red5::ApplicationAdapter
     end
 
     if @encre.auth.connection(conn, params)
+      @encre.event.server_connect(conn)
       super(conn, params)
     else
       false
@@ -96,6 +109,7 @@ class Application < Red5::ApplicationAdapter
 
   def appDisconnect(conn)
     puts "End of connection: ENCRE VideoChat v1"
+    @encre.event.server_disconnect(conn)
     if appScope == conn.getScope && @serverStream != nil
       @serverStream.close
     end
@@ -105,11 +119,22 @@ class Application < Red5::ApplicationAdapter
   def roomJoin(client, scope)
     puts "Room Join. (#{scope.get_name})"
 
-    @encre.auth.join(client, scope)
+    if @encre.auth.join(client, scope)
+      #emit event
+      @encre.event.room_join(client, scope)
+      true
+    else
+      false
+    end
+  end
+
+  def roomLeave(client, scope)
+    puts "Room Leave. (#{scope.get_name})"
+    @encre.event.room_leave(client, scope)
   end
 
   def toString
-    return "encrev1: toString"
+    return "encrev1 Application Adapter"
   end
 
   def setScriptContext(scriptContext)
@@ -121,5 +146,89 @@ class Application < Red5::ApplicationAdapter
     return @value.send(m, *args)
   end
 
+  ############## IStreamAwareScopeHandler
+  # def streamPublishStart(stream)
+  #   puts "Somebody published a stream (#{stream.class})"
+  # end
+
+  # def streamBroadcastStart(stream)
+  #   puts "Somebody published a stream (#{stream.class})"
+  # end
+
+  def streamBroadcastClose(stream)
+    puts "streamBroadcastClose (#{stream.class})"
+    @encre.event.stream_stopped(stream)
+  end
+
+  def streamBroadcastStart(stream)
+    puts "streamBroadcastStart (#{stream.class})"
+    @encre.event.stream_started(stream)
+  end
+
+  def streamPlayItemPause(stream, item, position)
+    puts "streamPlayItemPause (#{stream.class})"
+  end
+
+  def streamPlayItemPlay(stream, item, isLive)
+    puts "streamPlayItemPlay (#{stream.class})"
+  end
+
+  def streamPlayItemResume(stream, item, position)
+    puts "streamPlayItemResume (#{stream.class})"
+  end
+
+  def streamPlayItemSeek(stream, item, position)
+    puts "streamPlayItemSeek (#{stream.class})"
+  end
+
+  def streamPlayItemStop(stream, item)
+    puts "streamPlayItemStop (#{stream.class})"
+  end
+
+  def streamPublishStart(stream)
+    puts "streamPublishStart (#{stream.class})"
+  end
+
+  def streamRecordStart(stream)
+    puts "streamRecordStart (#{stream.class})"
+  end
+
+  def streamSubscriberClose(stream)
+    puts "streamSubscriberClose (#{stream.class})"
+    # @encre.event.stream_unwatched(stream)
+  end
+
+  def streamSubscriberStart(stream)
+    puts "streamSubscriberStart (#{stream.class})"
+    # @encre.event.stream_watched(stream)
+  end
+
+  ############## End of IStreamAwareScopeHandler
+
+  def addChildScope(scope)
+    puts "Added a scope: #{scope.get_name}(#{scope.inspect}, #{scope.class})"
+    true
+  end
+
 end
 
+# class TestSecurity
+#   include Red5::IStreamPublishSecurity
+#   include Red5::IStreamPlaybackSecurity
+
+#   java_signature "boolean isPlaybackAllowed(IScope, String, int, int, boolean)"
+#   def isPlaybackAllowed(scope, name, start, length, flush)
+#     puts "Playback security"
+#     puts "#{name} : #{length} : #{flush}"
+#     puts scope.to_s
+#     false
+#   end
+
+#   java_signature "boolean isPublishAllowed(IScope, String, String)"
+#   def isPublishAllowed(scope, name, mode)
+#     puts "Publish security"
+#     puts "#{name} : #{mode}"
+#     puts scope.to_s
+#     false
+#   end
+# end

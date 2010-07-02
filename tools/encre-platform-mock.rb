@@ -30,13 +30,25 @@ require 'sinatra'
 conf = {:red5_token => 'Keiqu0Iecouc4kiYuaF6ea3u',
         :auth => {'token1' => {'videochat_connect' => {'' => true},
                                'videochat_join' => {'room1' => true,
-                                                   'room2' => false}},
+                                                   'room2' => false},
+                               'videochat_streamstarted' => {'room1' => true,
+                                                             'room2' => false},
+                               'videochat_streamwatched' => {'room1' => true,
+                                                             'room2' => true}},
                   'token2' => {'videochat_connect' => {'' => true},
                                'videochat_join' => {'room1' => true,
-                                                   'room2' => true}},
+                                                   'room2' => true},
+                               'videochat_streamstarted' => {'room1' => false,
+                                                             'room2' => true},
+                               'videochat_streamwatched' => {'room1' => true,
+                                                             'room2' => true}},
                   'token3' => {'videochat_connect' => {'' => true},
                                'videochat_join' => {'room1' => false,
-                                                   'room2' => true}}}}
+                                                   'room2' => true},
+                               'videochat_streamstarted' => {'room1' => true,
+                                                             'room2' => false},
+                               'videochat_streamwatched' => {'room1' => false,
+                                                             'room2' => false}}}}
 
 
 get '/token/get' do
@@ -53,4 +65,10 @@ get "/token/:btoken/isvalid" do
   end
   puts "--> NOK\n\n"
   {:error => 'not_authorized'}.to_json
+end
+
+post "/event/push?" do
+  puts "Token is #{params['token']}"
+  puts @request.body.string
+  {:ok => 'i got it'}.to_json
 end

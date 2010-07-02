@@ -33,4 +33,5 @@ module Red5
   include_package "org.red5.server.stream"
 end
 
-
+class Room < Red5::MultiThreadApplicationAdapter
+end

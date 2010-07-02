@@ -24,6 +24,7 @@
 ##
 
 require 'rubygems'
+require 'haml'
 require 'sinatra'
 
 set :haml, {:format => :html5 }
@@ -39,6 +40,7 @@ end
 
 get '/publish' do
   @full_url = "#{params[:server]}/#{params[:room]}"
+  # @full_url = "#{params[:server]}"
   haml :publish
 end
 

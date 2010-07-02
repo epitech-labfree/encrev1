@@ -26,8 +26,9 @@
 		<constructor-arg index="0" value="classpath:applications/main.rb"/>
 		<constructor-arg index="1">
 			<list>
-				<value>org.red5.server.api.IScopeHandler</value>
+				<value>org.red5.server.api.stream.IStreamAwareScopeHandler</value>
 				<value>org.red5.server.adapter.IApplication</value>
+				<value>org.red5.server.api.stream.IStreamSecurityService</value>
 			</list>
 		</constructor-arg>
 	</bean>

@@ -60,20 +60,94 @@ module Encre
     def initialize(conf)
       @conf = conf
       @auth = Encre::Auth.new(@conf)
+      @event = Encre::Event.new(@conf)
     end
   end
 
   class Event
     def initialize(conf)
       @conf = conf
+      @url = "#{@conf.method}://#{@conf.server}:#{@conf.port}"
     end
 
-    def event(type, metadatas = {} , id = "", eventlink = "")
-      e = {:type => type,
-        :timecode => Time.now.tv_sec,
-        :id => id,
-        :eventLink => eventlink,
-        :metadatas => metadatas}
+    # def event(euid, token, type, metadatas = {} , id = "", eventlink = "")
+    # The event must have been validated by the encre platform server before pushing it (isvalid?)
+    def event(event)
+      timecode = Time.now.tv_sec
+      e = {:timecode => timecode,
+        :id => "#{event[:type]}_#{timecode}_#{rand(99999)}",
+        :eventLink => "",
+        :metadata => ""
+      }
+      e.merge! event
+
+      request_url = "#{@url}/event/push?"
+      request_url += "token=#{@conf.token}"
+      response = RestClient.post request_url, e.to_json, :content_type => :json, :accept => :json
+
+      # The doc doesn't mention any error code or return value from this method
+      true
+    end
+
+    def event_stream(stream, type, who = nil)
+      client = stream.get_provider.get_connection.get_client
+      return unless client.has_attribute 'encre_token'
+      token = client.get_attribute 'encre_token'
+
+      event(:type => type,
+            :metadata => {:eutoken => token,
+              :path => stream.get_scope.get_path,
+              :room => stream.get_scope.get_name,
+              :name => stream.get_published_name })
+    end
+
+    def stream_watched(stream)
+      event_stream(stream, 'videochat_streamwatched_event')
+    end
+
+    def stream_unwatched(stream)
+      event_stream(stream, 'videochat_streamunwatched_event')
+    end
+
+    def stream_started(stream)
+      event_stream(stream, 'videochat_streamstarted_event')
+    end
+
+    def stream_stopped(stream)
+      event_stream(stream, 'videochat_streamstopped_event')
+    end
+
+    def server_connect(conn)
+      puts "server connect event\n\n"
+      return false unless conn.get_client.has_attribute('encre_token')
+      token = conn.get_client.get_attribute('encre_token').to_s
+
+      event(:type => 'videochat_serverconnect_event', :metadata => {:eutoken => token})
+    end
+
+    def server_disconnect(conn)
+      return false unless conn.get_client.has_attribute('encre_token')
+      token = conn.get_client.get_attribute('encre_token').to_s
+
+      event(:type => 'videochat_serverdisconnect_event', :metadata => {:eutoken => token})
+    end
+
+    def room_join(client, scope)
+      return false unless client.has_attribute('encre_token')
+      token = client.get_attribute('encre_token').to_s
+
+      event(:type => 'videochat_roomjoin_event',
+            :metadata => {:path => scope.get_path, :room => scope.get_name,
+              :eutoken => token })
+    end
+
+    def room_leave(client, scope)
+      return false unless client.has_attribute('encre_token')
+      token = client.get_attribute('encre_token').to_s
+
+      event(:type => 'videochat_roomleave_event',
+            :metadata => {:path => scope.get_path, :room => scope.get_name,
+              :eutoken => token })
     end
   end
 
@@ -108,6 +182,8 @@ module Encre
     def connection(conn, params)
       token = params[0].to_s.delete '[]'
       conn.get_client.set_attribute('encre_token', token)
+      # seems useless: FIXME, get and set the real euid
+      # conn.get_client.set_attribute('encre_uid', "123456789")
       auth(token, 'videochat_connect', '')
     end
 
@@ -116,6 +192,24 @@ module Encre
       token = client.get_attribute('encre_token').to_s
       auth(token, 'videochat_join', scope.get_name)
     end
+
+    def stream_auth(scope, name, type)
+      # FIXME Check from threading issues.
+      conn = Java::OrgRed5ServerApi::Red5::get_connection_local
+      return false unless conn.get_client.has_attribute('encre_token')
+      token = conn.get_client.get_attribute('encre_token')
+
+      auth(token, type, scope.get_name)
+    end
+
+    def stream_publish(scope, name, mode)
+      stream_auth scope, name, 'videochat_streamstarted'
+    end
+
+    def stream_watch(scope, name, start, length, flush)
+      stream_auth scope, name, 'videochat_streamwatched'
+    end
+
   end
 
 end

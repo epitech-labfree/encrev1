@@ -32,7 +32,8 @@ require 'rubygems'
 # FIXME, find a better way to find the required classes
 #
 #puts ENV['RED5_HOME'] + "/webapps/encrev1/WEB-INF/classes/applications/"
-$:.unshift ENV['RED5_HOME'] + "/webapps/encrev1/WEB-INF/classes/applications/"
+app_root = ENV['RED5_HOME'] + "/webapps/encrev1/"
+$:.unshift app_root + "WEB-INF/classes/applications/"
 require 'encre_auth'
 require 'encre_poller'
 
@@ -173,11 +174,21 @@ class Application < Red5::MultiThreadedApplicationAdapter
   def streamBroadcastClose(stream)
     puts "streamBroadcastClose (#{stream.class})"
     @encre.event.stream_stopped(stream)
+
+    if stream.get_save_filename
+      puts "FIXME: Should push the file on the platform"
+    end
   end
 
   def streamBroadcastStart(stream)
     puts "streamBroadcastStart (#{stream.class})"
     @encre.event.stream_started(stream)
+
+    if @encre.auth.stream_record(stream)
+      scope = stream.get_scope.get_name
+      token = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'encre_token'
+      stream.save_as "#{scope}__#{token}", true
+    end
   end
 
   def streamPlayItemPause(stream, item, position)

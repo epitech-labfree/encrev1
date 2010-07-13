@@ -40,4 +40,3 @@ post '/event/push' do
   ApiEvent.create :event => @request.body.string
 end
 
-

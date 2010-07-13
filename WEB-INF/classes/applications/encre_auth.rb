@@ -210,6 +210,15 @@ module Encre
       stream_auth scope, name, 'videochat_streamwatched'
     end
 
+    def stream_record(stream)
+      # FIXME Check from threading issues.
+      conn = Java::OrgRed5ServerApi::Red5::get_connection_local
+      return false unless conn.get_client.has_attribute('encre_token')
+      token = conn.get_client.get_attribute('encre_token')
+
+      auth(token, 'videochat_streamrecorded', stream.get_scope.get_name)
+    end
+
   end
 
 end

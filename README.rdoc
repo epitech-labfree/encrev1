@@ -93,6 +93,9 @@ required but will soon be. They are here as a reminder)
   * !activerecord-jdbcsqlite3-adapter
   * !activerecord-jdbc-adapter
   * !activerecord
+  * sinatra
+  * warbler
+  * haml
 * The latest stable OpenSource Flex SDK from Adobe (http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+4)
 * Your favorite text editor
 

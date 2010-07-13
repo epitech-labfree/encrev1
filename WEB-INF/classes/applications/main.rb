@@ -34,6 +34,7 @@ require 'rubygems'
 #puts ENV['RED5_HOME'] + "/webapps/encrev1/WEB-INF/classes/applications/"
 $:.unshift ENV['RED5_HOME'] + "/webapps/encrev1/WEB-INF/classes/applications/"
 require 'encre_auth'
+require 'encre_poller'
 
 module Red5
   include_package "org.red5.server.api"
@@ -41,6 +42,8 @@ module Red5
   include_package "org.red5.server.api.stream.support"
   include_package "org.red5.server.adapter"
   include_package "org.red5.server.stream"
+  include_package "org.red5.server.scheduling"
+  include_package "org.red5.server.api.scheduling"
 end
 
 #
@@ -61,18 +64,30 @@ class Application < Red5::MultiThreadedApplicationAdapter
 
     puts "Initializing ENCRE VideoChat v1..."
     @encre = Encre::Platform::connect
+    # @schedulingService = Red5::QuartzSchedulingService.new
+    # puts @schedulingService.inspect
+
   end
 
   def appStart(app)
     puts "...Done."
+    #Saving our scope for later use
     @appScope = app
 
+    # Registering play and publish auth handlers
     registerStreamPlaybackSecurity do |scope, name, start, len, flush|
       @encre.auth.stream_watch scope, name, start, len, flush
     end
     registerStreamPublishSecurity do |scope, name, mode|
       @encre.auth.stream_publish scope, name, mode
     end
+
+    # Initializing our app scheduling service, using red5 global one
+    @schedulingService = @appScope.get_context.get_bean(Red5::ISchedulingService::BEAN_NAME);
+    #puts app.get_application_loader.inspect
+    #get_root_context.get_beans_of_type(nil)
+    @job = Encre::Poller.new
+    @rest_job = @schedulingService.addScheduledJob(1000, @job)
 
     super
 
@@ -211,24 +226,3 @@ class Application < Red5::MultiThreadedApplicationAdapter
   end
 
 end
-
-# class TestSecurity
-#   include Red5::IStreamPublishSecurity
-#   include Red5::IStreamPlaybackSecurity
-
-#   java_signature "boolean isPlaybackAllowed(IScope, String, int, int, boolean)"
-#   def isPlaybackAllowed(scope, name, start, length, flush)
-#     puts "Playback security"
-#     puts "#{name} : #{length} : #{flush}"
-#     puts scope.to_s
-#     false
-#   end
-
-#   java_signature "boolean isPublishAllowed(IScope, String, String)"
-#   def isPublishAllowed(scope, name, mode)
-#     puts "Publish security"
-#     puts "#{name} : #{mode}"
-#     puts scope.to_s
-#     false
-#   end
-# end

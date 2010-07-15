@@ -40,7 +40,7 @@ this component.
 [./WEB-INF/] Red5 Application code folder, see the _Application_ subsection.
 [./tools/] Contains tools which might help you (or not) running the server. See the _Tools_ subsection.
 [./flash/] Contains an example of client of the component with flash
-           code and a riny webapp for launching flash widgets, see the _Flash_ subsection.
+           code and a tiny webapp for launching flash widgets, see the _Flash_ subsection.
 
 == Installation
 
@@ -69,9 +69,9 @@ required but will soon be. They are here as a reminder)
 * git-core
 * build-essential (iirc, it is only for GNU Make)
 * unzip
-* !sqlite3
-* !libsqlite3-0
-* !libsqlite3-dev
+* sqlite3
+* libsqlite3-0
+* libsqlite3-dev
 * ruby1.8
 * ruby1.8-dev
 * ruby
@@ -82,17 +82,17 @@ required but will soon be. They are here as a reminder)
   * haml
   * json
   * rest-client
-  * !sqlite3-ruby
+  * sqlite3-ruby
   * mongrel
 * jruby
 * The following jruby gems (install using `jruby -S gem install xxx` (as the user who will run the red5 server))
   * rest-client
   * json_pure
   * jruby-openssl
-  * !jdbc-sqlite3
-  * !activerecord-jdbcsqlite3-adapter
-  * !activerecord-jdbc-adapter
-  * !activerecord
+  * jdbc-sqlite3
+  * activerecord-jdbcsqlite3-adapter
+  * activerecord-jdbc-adapter
+  * activerecord
   * sinatra
   * warbler
   * haml

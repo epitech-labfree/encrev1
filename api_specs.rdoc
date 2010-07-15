@@ -1,10 +1,271 @@
 == Introduction
 
-This document is the official reference regarding the api of the Encre VideoChat component v1.
+This document is the official reference regarding the api of the Encre
+VideoChat component v1.
 
-It contains the definition of the small part of the api which interests the clients directly and the list of the events and authorization point
+It contains  the definition of the  small part of  the api interesting
+the  clients directly  and the  list of the events  and authorization
+points the videochat component has with the encre platform server.
 
-* test
-* test 1
+It is also a proposal regarding the evolution of the current video API
+of the ENCRE platform.
+
+== Specification
+
+=== Flash Client API
+
+In order to successfully connect and operates with the videochat
+component. Clients must develop a flash application/widget
+implementing this simple API (the provided examples can be used as a
+starting point). Web application clients must also set the rights acl
+in the Encre platform server as well as reacting correctly to the
+events we emit via the platform, but this will be discussed in a
+specific section.
+
+The flash client api is really simple. All there is to do is to pass
+the red5 videochat component the client token when connecting as the
+first connection parameters.
+
+Here is a code snippet from our example :
+
+ connection = new FMSConnection();
+ connection.connect('rtmp://videochatserver:port/encrev1/room/', 'TokenObtainedFromEncrePlatformServer');
+ stream = new NetStream(connection);
+ // [...] configuration of the camera, stream quality, path, etc.
+ stream.publish(stream_name, stream_type);
+
+The token will be associated to the connection in the videochat
+component and will be used to authorize on the encre platform the
+differents actions that are automatically performed by the component
+for that connection like publishing a stream, recording it, reading a
+stream, etc.
+
+=== VideoChat Component and Encre Platform interactions.
+
+The videochat component
+
+=== VideoChat => Encre events.
+
+These events are POSTed to the encre server via http on this method
+ http://encre_server/event/push?token=videochat_own_auth_token
+
+==== videochat_serverconnect_event
+*Authorized*. This is a low-level event. A client is connecting to the videochat server.
+
+ { "event" : {
+ "type" : "videochat_serverconnect_event",
+ "timecode" : "123456",
+ "id" : "videochat_serverconnect_event_123465_86546",
+ "eventLink" : "",
+ "metadata" : {
+   "eutoken" : "theconcernedusertoken"
+   }
+ }}
+
+==== videochat_serverdisconnect_event
+This is a low-level event. A client is disconnecting from the videochat server.
+
+ { "event" : {
+ "type" : "videochat_serverconnect_event",
+ "timecode" : "123456",
+ "id" : "videochat_serverconnect_event_123465_86546",
+ "eventLink" : "",
+ "metadata" : {
+   "eutoken" : "theconcernedusertoken"
+   }
+ }}
+
+==== videochat_roomjoin_event
+*Authorized*. A client is connecting to aspecific room/path/scope of the server.
+
+ { "event" : {
+ "type" : "videochat_roomjoin_event",
+ "timecode" : "123456",
+ "id" : "videochat_roomjoin_event_123465_89546",
+ "eventLink" : "",
+ "metadata" : {
+   "eutoken" : "theconcernedusertoken",
+   "path" : "/default/encrev1",
+   "room" : "room101"
+   }}
+ }
+
+
+==== videochat_roomleave_event
+A client is connecting from a specific room/path/scope of the server.
+
+ { "event" : {
+ "type" : "videochat_roomleave_event",
+ "timecode" : "123456",
+ "id" : "videochat_roomleave_event_123465_89546",
+ "eventLink" : "",
+ "metadata" : {
+   "eutoken" : "theconcernedusertoken",
+   "path" : "/default/encrev1",
+   "room" : "room101"
+   }
+ }}
+
+==== videochat_streamstarted_event
+*Authorized*. A client has published a new stream in a particular room.
+
+ { "event" : {
+ "type" : "videochat_streamstarted_event",
+ "timecode" : "123456",
+ "id" : "videochat_streamstarted_event_123465_86546",
+ "eventLink" : "",
+ "metadata" : {
+   "eutoken" : "theconcernedusertoken",
+   "path" : "/default/encrev1/",
+   "room" : "my_videochat_room3",
+   "name" : "stream_name_like_john_doe"
+   }
+ }}
+
+
+==== videochat_streamstopped_event
+A client has stopped to publish a stream in a particular room, this is the end of its transmission.
+
+ { "event" : {
+ "type" : "videochat_streamstopped_event",
+ "timecode" : "123456",
+ "id" : "videochat_streamstopped_event_123465_86546",
+ "eventLink" : "",
+ "metadata" : {
+   "eutoken" : "theconcernedusertoken",
+   "path" : "/default/encrev1/",
+   "room" : "my_videochat_room3",
+   "name" : "stream_name_like_john_doe"
+   }
+ }}
+
+
+==== videochat_streamwatched_event
+*Authorized*. A client is starting to read/watch the stream of another client in the room
+
+ { "event" : {
+ "type" : "videochat_streamwatched_event",
+ "timecode" : "123456",
+ "id" : "videochat_streamwatched_event_123465_86546",
+ "eventLink" : "",
+ "metadata" : {
+   "eutoken" : "theconcernedusertoken",
+   "path" : "/default/encrev1/",
+   "room" : "my_videochat_room3",
+   "name" : "stream_name_like_john_doe"
+   }
+ }}
+
+
+==== videochat_streamunwatched_event
+A client stopped to read/watch a stream.
+
+ { "event" : {
+ "type" : "videochat_streamunwatched_event",
+ "timecode" : "123456",
+ "id" : "videochat_streamunwatched_event_123465_86546",
+ "eventLink" : "",
+ "metadata" : {
+   "eutoken" : "theconcernedusertoken",
+   "path" : "/default/encrev1/",
+   "room" : "my_videochat_room3",
+   "name" : "stream_name_like_john_doe"
+   }
+ }}
+
+==== videochat_streamrecorded_event (Not implemented yet)
+*Authorized*. The stream is being recorded.
+
+ { "event" : {
+ "type" : "videochat_streamrecorded_event",
+ "timecode" : "123456",
+ "id" : "videochat_streamrecorded_event_123465_86546",
+ "eventLink" : "",
+ "metadata" : {
+   "eutoken" : "theconcernedusertoken",
+   "path" : "/default/encrev1/",
+   "room" : "my_videochat_room3",
+   "name" : "stream_name_like_john_doe",
+   "filename" : "my_videochat_room3/stream_name_like_john_doe.flv"
+   }
+ }}
+
+=== VideoChat authorization points.
+
+Before executing a particular action, the component asks the ENCRE
+server if it is allowed. This allows the distribution developpers to
+control precisely what is happening on the videochat and make the
+videochat component behave the way they want.
+
+This is done by querying the following REST method on the ENCRE
+server:
+ http://encre_server/token/videochat_own_token/isvalid?token=client_token&type=authpoint&scope=xxx
+
+The following list define the different authorization points and their
+scope parameter. In every auth point, the token parameter is the
+end-user token obtained by the user on the ENCRE server and
+transmitted to the videochat component via the Flash Client API.
+
+Before any 'authorized' event to happen, it is authorized this
+way. Every auth point here corresponds to an event defined previously.
+
+==== videochat_serverconnect
+Is the client authorized to connect to the server?
+
+* scope : void/unused
+
+==== videochat_join
+Is the client authorized to join the room ?
+
+* scope : the name of the joined room
+
+==== videochat_streamstarted
+Is the client authorized to publish a stream on the specified room ?
+
+* scope : the name of the room the event want to publish in
+
+==== videochat_streamwatched
+Is the client authorized to watch a stream in the specified room ?
+
+* scope : The room the user want to watch a stream in
+
+==== videochat_streamrecorded
+Is the videochat server allowed to record the stream of that user in the specified room ?
+
+* token : The token of the user the server wants to record
+* scope : The room in which is publied the stream the server wants to record
+
+=== Encre => VideoChat events.
+
+(not fully implemented yet)
+
+Although main of the logic of the videochat component is performed
+automatically and configured via ENCRE ACLs, the videochat component
+allows the distribution to execute some specific actions by sending it
+events via the ENCRE server. These events are listed below.
+
+The url on which to POST events is:
+ http://videochat_serv:videochat_apiserver_port/event/push
+
+==== videochat_kick_event
+
+When received, the videochat component kicks the specified user from
+the specified room:
+
+{ "event":
+       { "type": "videostream_kicked_event"
+       , "timecode":"63443922865"
+       , "id":""
+       , "eventLink":""
+       , "metadatas":
+           { "stream" : "thestreamname",
+             "path" : "default/encrev1/organisationx/",
+             "room" : "room101",
+             "eutoken":"token"
+           }
+       }
+   }
+
+
 
 

@@ -81,6 +81,9 @@ module Encre
       }
       e.merge! event
 
+      # FIXME ! Use real_event to respect the api
+      real_event = {:event => e}
+
       request_url = "#{@url}/event/push?"
       request_url += "token=#{@conf.token}"
       response = RestClient.post request_url, e.to_json, :content_type => :json, :accept => :json

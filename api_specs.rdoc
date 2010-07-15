@@ -1,0 +1,10 @@
+== Introduction
+
+This document is the official reference regarding the api of the Encre VideoChat component v1.
+
+It contains the definition of the small part of the api which interests the clients directly and the list of the events and authorization point
+
+* test
+* test 1
+
+

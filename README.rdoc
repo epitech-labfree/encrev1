@@ -75,6 +75,7 @@ required but will soon be. They are here as a reminder)
 * ruby1.8
 * ruby1.8-dev
 * ruby
+* rake
 * rubygems1.8
 * The following ruby gems (install using `gem install xxx` (as root))
   * gemcutter
@@ -167,6 +168,21 @@ you want to user the videochat component. Tu run it, open another term
 and issue the following command:
 
   $ cd ~/encre_video/encrev1/tools/ && ruby encre-platform-mock.rb
+
+==== Setting up the database and running the ENCRE Api entry point
+
+You must now setup the database used to communicate between the ENCRE
+Api entry point and the videochat application by issuing this command
+
+  $  ~/encre_video/encrev1/api && rake migrate #(or simply rake)
+
+If the rake command is not found, check the rake installation
+documentation for your distribution or you system, or the official
+rake documentation on the Internet.
+
+You may finally run the API entry point by issuing this command.
+
+  $ ~/encre_video/encrev1/api && ruby server.rb
 
 ==== Building and running the demo client
 

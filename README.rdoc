@@ -84,6 +84,7 @@ required but will soon be. They are here as a reminder)
   * json
   * rest-client
   * sqlite3-ruby
+  * activerecord
   * mongrel
 * jruby
 * The following jruby gems (install using `jruby -S gem install xxx` (as the user who will run the red5 server))

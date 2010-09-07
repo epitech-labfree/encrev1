@@ -32,8 +32,8 @@ require 'rubygems'
 # FIXME, find a better way to find the required classes
 #
 #puts ENV['RED5_HOME'] + "/webapps/encrev1/WEB-INF/classes/applications/"
-app_root = ENV['RED5_HOME'] + "/webapps/encrev1/"
-$:.unshift app_root + "WEB-INF/classes/applications/"
+APP_ROOT = ENV['RED5_HOME'] + "/webapps/encrev1/"
+$:.unshift APP_ROOT + "WEB-INF/classes/applications/"
 require 'encre_auth'
 require 'encre_poller'
 
@@ -64,10 +64,9 @@ class Application < Red5::MultiThreadedApplicationAdapter
     super
 
     puts "Initializing ENCRE VideoChat v1..."
-    @encre = Encre::Platform::connect
-    # @schedulingService = Red5::QuartzSchedulingService.new
-    # puts @schedulingService.inspect
-
+    options = YAML::load_file APP_ROOT + '/api/platform.yml'
+    puts "1: #{options}"
+    @encre = Encre::Platform::connect options
   end
 
   def appStart(app)

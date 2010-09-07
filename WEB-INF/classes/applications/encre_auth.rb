@@ -38,21 +38,24 @@ end
 
 module Encre
   class Conf
-    attr_accessor :server, :method, :port, :token
-
-    def initialize(server, method, port)
-      @server = server
-      @method = method
-      @port = port
+    attr_accessor :server, :port, :token, :method, :prefix
+    def initialize(options)
+      @server = options[:server]
+      @port = options[:port]
+      @method = options[:method]
+      @prefix = options[:prefix]
       @token = "NotAnyTokenYet"
     end
+
   end
 
   class Platform
     attr_reader :auth, :event, :conf
 
-    def self.connect(server = 'localhost', port = 4567, method = 'http')
-      conf = Encre::Conf.new(server, method, port)
+    def self.connect(o = {})
+      options = {:server => 'localpwet', :port => 4657, :method => 'http', :prefix => ''}.merge o
+      puts "2: #{options}"
+      conf = Encre::Conf.new(options)
       Encre::Platform.new(conf)
     end
 
@@ -67,7 +70,7 @@ module Encre
   class Event
     def initialize(conf)
       @conf = conf
-      @url = "#{@conf.method}://#{@conf.server}:#{@conf.port}"
+      @url = "#{@conf.method}://#{@conf.server}:#{@conf.port}#{@conf.prefix}"
     end
 
     # def event(euid, token, type, metadatas = {} , id = "", eventlink = "")
@@ -157,11 +160,12 @@ module Encre
   class Auth
     def initialize(conf)
       @conf = conf
-      @url = "#{@conf.method}://#{@conf.server}:#{@conf.port}"
+      @url = "#{@conf.method}://#{@conf.server}:#{@conf.port}#{@conf.prefix}"
     end
 
     def server(scope)
       puts "Authorizing from ENCRE server (#{scope.get_path})..."
+      puts "#{@url}/token/get"
       r = RestClient.get "#{@url}/token/get"
       @conf.token = JSON.parse(r.to_str)['token']
       if @conf.token

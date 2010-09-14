@@ -84,7 +84,8 @@ required but will soon be. They are here as a reminder)
   * json
   * rest-client
   * sqlite3-ruby
-  * activerecord
+  * activerecord (< 3.0.0)
+  * activesupport (< 3.0.0)
   * mongrel
 * jruby
 * The following jruby gems (install using `jruby -S gem install xxx` (as the user who will run the red5 server))
@@ -94,10 +95,9 @@ required but will soon be. They are here as a reminder)
   * jdbc-sqlite3
   * activerecord-jdbcsqlite3-adapter
   * activerecord-jdbc-adapter
-  * activerecord
+  * activerecord (< 3.0.0)
+  * activesupport (< 3.0.0)
   * sinatra
-  * warbler
-  * haml
 * The latest stable OpenSource Flex SDK from Adobe (http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+4)
 * Your favorite text editor
 

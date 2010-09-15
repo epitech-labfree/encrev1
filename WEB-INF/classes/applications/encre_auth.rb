@@ -54,7 +54,6 @@ module Encre
 
     def self.connect(o = {})
       options = {:server => 'localpwet', :port => 4657, :method => 'http', :prefix => ''}.merge o
-      puts "2: #{options}"
       conf = Encre::Conf.new(options)
       Encre::Platform.new(conf)
     end
@@ -89,7 +88,7 @@ module Encre
 
       request_url = "#{@url}/event/push?"
       request_url += "token=#{@conf.token}"
-      response = RestClient.post request_url, e.to_json, :content_type => :json, :accept => :json
+      response = RestClient.post request_url, real_event.to_json, :content_type => :json, :accept => :json
 
       # The doc doesn't mention any error code or return value from this method
       true
@@ -164,8 +163,7 @@ module Encre
     end
 
     def server(scope)
-      puts "Authorizing from ENCRE server (#{scope.get_path})..."
-      puts "#{@url}/token/get"
+      puts "Authorizing from ENCRE server (#{scope.get_path}) on #{@url}/token/get ..."
       r = RestClient.get "#{@url}/token/get"
       @conf.token = JSON.parse(r.to_str)['token']
       if @conf.token

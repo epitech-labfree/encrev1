@@ -65,7 +65,6 @@ class Application < Red5::MultiThreadedApplicationAdapter
 
     puts "Initializing ENCRE VideoChat v1..."
     options = YAML::load_file APP_ROOT + '/api/platform.yml'
-    puts "1: #{options}"
     @encre = Encre::Platform::connect options
   end
 

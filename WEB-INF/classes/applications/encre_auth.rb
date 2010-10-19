@@ -36,9 +36,34 @@ module Red5
   include_package "org.red5.server.stream"
 end
 
+class Hash
+  def __context_to_string(c)
+    res = c.shift.to_s
+    c.each { |e| res += "[#{e}]" }
+    res
+  end
+
+  def __url_map(h, context = [])
+    res = []
+    h.each do |k, v|
+      c = context.dup << k
+      if v.is_a? Hash
+        res << __url_map(v, c)
+      elsif v.respond_to? :to_s
+        res << "#{__context_to_string c}=#{v}"
+      end
+    end
+    res
+  end
+
+  def url_encode
+    __url_map(self).join("&")
+  end
+end
+
 module Encre
   class Conf
-    attr_accessor :server, :port, :token, :method, :prefix
+    attr_accessor :server, :port, :token, :method, :prefix, :sid
     def initialize(options)
       @server = options[:server]
       @port = options[:port]
@@ -75,20 +100,15 @@ module Encre
     # def event(euid, token, type, metadatas = {} , id = "", eventlink = "")
     # The event must have been validated by the encre platform server before pushing it (isvalid?)
     def event(event)
-      timecode = Time.now.tv_sec
-      e = {:timecode => timecode,
-        :id => "#{event[:type]}_#{timecode}_#{rand(99999)}",
-        :eventLink => "",
-        :metadata => ""
-      }
+      e = { :metadata => "" }
       e.merge! event
 
-      # FIXME ! Use real_event to respect the api
-      real_event = {:event => e}
-
-      request_url = "#{@url}/event/push?"
-      request_url += "token=#{@conf.token}"
-      response = RestClient.post request_url, real_event.to_json, :content_type => :json, :accept => :json
+      request_url = "#{@url}/event/af83?"
+      request_url += "euid=encre-video&esid=#{@conf.sid}"
+      request_url += "&" + e.url_encode
+      response = RestClient.put request_url, ""
+      puts "Sending an event to encre: #{request_url}"
+      puts "--> Got response : #{response}"
 
       # The doc doesn't mention any error code or return value from this method
       true
@@ -163,17 +183,22 @@ module Encre
     end
 
     def server(scope)
-      # Rendered useless by recent changes on the encre platform
-      # Scheduled for deletion
-      # puts "Authorizing from ENCRE server (#{scope.get_path}) on #{@url}/token/get ..."
-      # r = RestClient.get "#{@url}/token/get"
-      # @conf.token = JSON.parse(r.to_str)['token']
-      # if @conf.token
-      #   puts "... Authorizarion token is #{@conf.token}"
-      # else
-      #   puts "... failed !"
-      # end
-      @conf.token
+      puts "Authorizing from ENCRE server (#{scope.get_path}) on #{@url}/presence/af83/encre-video ..."
+      begin
+        r = RestClient.put "#{@url}/presence/af83/encre-video?auth=token&credential=#{@conf.token}", ''
+        @conf.sid = JSON.parse(r.to_str)['result']
+        if @conf.sid
+          puts "... Authorizarion token is #{@conf.sid}"
+        else
+          @conf.sid = nil
+        end
+      rescue
+        @conf.sid = nil
+        puts "... failed ! (check exception below)"
+        puts $!
+      end
+
+      @conf.sid
     end
 
     def auth(client_token, event_type, scope)
@@ -181,8 +206,12 @@ module Encre
       request += "token=#{client_token}"
       request += "&type=#{event_type}"
       request += "&scope=#{scope}"
-      response = RestClient.get request
-      return false if JSON.parse(response.to_str).has_key? 'error'
+      # Currently not implemented/documented by Encre platform.
+      # Will be available soon, with a new semantic
+      # puts "Executing this request : #{request}."
+      # response = RestClient.get request
+      # puts "--> Got response: #{response}"
+      # return false if JSON.parse(response.to_str).has_key? 'error'
       true
     end
 

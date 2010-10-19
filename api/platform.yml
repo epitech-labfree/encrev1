@@ -2,3 +2,4 @@
 :port: 4567
 :method: http
 :prefix:
+:token: token_server_will_be_there

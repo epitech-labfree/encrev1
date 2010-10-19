@@ -44,7 +44,7 @@ module Encre
       @port = options[:port]
       @method = options[:method]
       @prefix = options[:prefix]
-      @token = "NotAnyTokenYet"
+      @token = options[:token]
     end
 
   end
@@ -163,14 +163,16 @@ module Encre
     end
 
     def server(scope)
-      puts "Authorizing from ENCRE server (#{scope.get_path}) on #{@url}/token/get ..."
-      r = RestClient.get "#{@url}/token/get"
-      @conf.token = JSON.parse(r.to_str)['token']
-      if @conf.token
-        puts "... Authorizarion token is #{@conf.token}"
-      else
-        puts "... failed !"
-      end
+      # Rendered useless by recent changes on the encre platform
+      # Scheduled for deletion
+      # puts "Authorizing from ENCRE server (#{scope.get_path}) on #{@url}/token/get ..."
+      # r = RestClient.get "#{@url}/token/get"
+      # @conf.token = JSON.parse(r.to_str)['token']
+      # if @conf.token
+      #   puts "... Authorizarion token is #{@conf.token}"
+      # else
+      #   puts "... failed !"
+      # end
       @conf.token
     end
 

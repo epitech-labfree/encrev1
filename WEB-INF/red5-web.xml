@@ -30,6 +30,9 @@
 				<value>org.red5.server.adapter.IApplication</value>
 				<value>org.red5.server.api.stream.IStreamSecurityService</value>
 				<value>org.red5.server.api.scheduling.ISchedulingService</value>
+                                <value>org.red5.server.api.IScopeAware</value>
+                                <value>org.red5.server.api.IScopeHandler</value>
+                                <value>org.red5.server.api.event.IEventHandler</value>
 			</list>
 		</constructor-arg>
 	</bean>

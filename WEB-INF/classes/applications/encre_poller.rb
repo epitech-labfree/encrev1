@@ -54,13 +54,15 @@ end
 class Poller
   include Red5::IScheduledJob
 
-  def initialize()
+  def initialize(app)
+    @app = app
     @mutex = Mutex.new
   end
 
   def execute(service)
     if @mutex.try_lock
       begin
+
         events = ApiEvent.all
         if events
           events_ids = events.map {|x| x.id}
@@ -68,6 +70,7 @@ class Poller
           events.each do |x|
             puts "Received a json event via db"
             puts "#{x.id} :: #{x.event}"
+
           end
         end
       rescue

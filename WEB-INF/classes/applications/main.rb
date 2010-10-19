@@ -85,7 +85,7 @@ class Application < Red5::MultiThreadedApplicationAdapter
     @schedulingService = @appScope.get_context.get_bean(Red5::ISchedulingService::BEAN_NAME);
     #puts app.get_application_loader.inspect
     #get_root_context.get_beans_of_type(nil)
-    @job = Encre::Poller.new
+    @job = Encre::Poller.new(self)
     @rest_job = @schedulingService.addScheduledJob(1000, @job)
 
     super

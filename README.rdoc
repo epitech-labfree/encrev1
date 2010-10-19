@@ -87,17 +87,6 @@ required but will soon be. They are here as a reminder)
   * activerecord (< 3.0.0)
   * activesupport (< 3.0.0)
   * mongrel
-* jruby
-* The following jruby gems (install using `jruby -S gem install xxx` (as the user who will run the red5 server))
-  * rest-client
-  * json_pure
-  * jruby-openssl
-  * jdbc-sqlite3
-  * activerecord-jdbcsqlite3-adapter
-  * activerecord-jdbc-adapter
-  * activerecord (< 3.0.0)
-  * activesupport (< 3.0.0)
-  * sinatra
 * The latest stable OpenSource Flex SDK from Adobe (http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+4)
 * Your favorite text editor
 
@@ -111,6 +100,7 @@ to this, the current recommended way of installing the Red5 server is
 to use the provided archive.
 
 You could find this archive here : http://github.com/epitech-labfree/encrev1/downloads
+Please double check you download the last version.
 
 === Setup guide
 

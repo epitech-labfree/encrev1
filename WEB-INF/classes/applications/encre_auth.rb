@@ -107,8 +107,8 @@ module Encre
       request_url += "euid=encre-video&esid=#{@conf.sid}"
       request_url += "&" + e.url_encode
       response = RestClient.put request_url, ""
-      puts "Sending an event to encre: #{request_url}"
-      puts "--> Got response : #{response}"
+      $log.info "Sending an event to encre: #{request_url}"
+      $log.info "--> Got response : #{response}"
 
       # The doc doesn't mention any error code or return value from this method
       true
@@ -143,7 +143,7 @@ module Encre
     end
 
     def server_connect(conn)
-      puts "server connect event\n\n"
+      $log.info "server connect event\n\n"
       return false unless conn.get_client.has_attribute('encre_token')
       token = conn.get_client.get_attribute('encre_token').to_s
 
@@ -183,7 +183,7 @@ module Encre
     end
 
     def server(scope)
-      puts "Authorizing from ENCRE server (#{scope.get_path}) on #{@url}/presence/af83/encre-video ..."
+      $log.info "Authorizing from ENCRE server (#{scope.get_path}) on #{@url}/presence/af83/encre-video ..."
       begin
         r = RestClient.put "#{@url}/presence/af83/encre-video?auth=token&credential=#{@conf.token}", ''
         @conf.sid = JSON.parse(r.to_str)['result']
@@ -194,8 +194,8 @@ module Encre
         end
       rescue
         @conf.sid = nil
-        puts "... failed ! (check exception below)"
-        puts $!
+        $log.info "... failed ! (check exception below)"
+        $log.info $!
       end
 
       @conf.sid

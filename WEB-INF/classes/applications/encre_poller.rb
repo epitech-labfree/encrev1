@@ -68,13 +68,13 @@ class Poller
           events_ids = events.map {|x| x.id}
           ApiEvent.delete(events_ids)
           events.each do |x|
-            puts "Received a json event via db"
-            puts "#{x.id} :: #{x.event}"
+            $log.info "Received a json event via db"
+            $log.info "#{x.id} :: #{x.event}"
 
           end
         end
       rescue
-        puts $!
+        $log.error $!
       end
       @mutex.unlock
     end

@@ -3,3 +3,5 @@
 :method: http
 :prefix:
 :token: token_server_will_be_there
+:logger: logfile.log
+:loglvl: DEBUG

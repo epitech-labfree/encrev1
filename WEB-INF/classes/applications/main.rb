@@ -27,6 +27,7 @@
 require 'java'
 require 'rubygems'
 
+
 # ENCRE video subcomponents/classes
 #
 # FIXME, find a better way to find the required classes
@@ -36,6 +37,17 @@ APP_ROOT = ENV['RED5_HOME'] + "/webapps/encrev1/"
 $:.unshift APP_ROOT + "WEB-INF/classes/applications/"
 require 'encre_auth'
 require 'encre_poller'
+
+#logger
+require 'logger'
+options = YAML::load_file APP_ROOT + '/api/platform.yml'
+options[:logger] = STDOUT if options[:logger] == "STDOUT" || !options[:logger]
+$log = Logger.new(options[:logger])
+if (Logger::Severity::const_defined? options[:loglvl].upcase)
+  $log.level = Logger.const_get(options[:loglvl].upcase.to_sym)
+else
+  $log.level = Logger::INFO  #default logger level
+end
 
 module Red5
   include_package "org.red5.server.api"
@@ -63,13 +75,14 @@ class Application < Red5::MultiThreadedApplicationAdapter
     #call super to init the superclass, in this case a Java class
     super
 
-    puts "Initializing ENCRE VideoChat v1..."
+    $log.info "Initializing ENCRE VideoChat v1..."
     options = YAML::load_file APP_ROOT + '/api/platform.yml'
+    $log.debug "options : #{options}"
     @encre = Encre::Platform::connect options
   end
 
   def appStart(app)
-    puts "...Done."
+    $log.info "...Done."
     #Saving our scope for later use
     @appScope = app
 
@@ -94,18 +107,18 @@ class Application < Red5::MultiThreadedApplicationAdapter
   end
 
   def appConnect(conn, params)
-    puts "Connection: ENCRE VideoChat v1"
-    puts "\tScope:#{conn.get_scope.get_path}"
-    puts "\tRoom:#{conn.get_scope.get_name}"
+    $log.info "Connection: ENCRE VideoChat v1"
+    $log.info "\tScope:#{conn.get_scope.get_path}"
+    $log.info "\tRoom:#{conn.get_scope.get_name}"
     if (params.length < 1)
-      puts "Didn't supplied the necessary parameters (connect(url, token);)"
+      $log.error "Didn't supplied the necessary parameters (connect(url, token);)"
       return false;
     end
-    puts "\tToken:#{params[0].to_s}"
+    $log.info "\tToken:#{params[0].to_s}"
 
     measureBandwidth(conn)
     if conn.instance_of?(Red5::IStreamCapableConnection)
-      puts "Got stream capable connection"
+      $log.info "Got stream capable connection"
       # sbc = Red5::SimpleBandwidthConfigure.new
       # sbc.setMaxBurst(8388608)
       # sbc.setBurst(8388608)
@@ -122,7 +135,7 @@ class Application < Red5::MultiThreadedApplicationAdapter
   end
 
   def appDisconnect(conn)
-    puts "End of connection: ENCRE VideoChat v1"
+    $log.info "End of connection: ENCRE VideoChat v1"
     @encre.event.server_disconnect(conn)
     if appScope == conn.getScope && @serverStream != nil
       @serverStream.close
@@ -131,7 +144,7 @@ class Application < Red5::MultiThreadedApplicationAdapter
   end
 
   def roomJoin(client, scope)
-    puts "Room Join. (#{scope.get_name})"
+    $log.info "Room Join. (#{scope.get_name})"
 
     if @encre.auth.join(client, scope)
       #emit event
@@ -143,7 +156,7 @@ class Application < Red5::MultiThreadedApplicationAdapter
   end
 
   def roomLeave(client, scope)
-    puts "Room Leave. (#{scope.get_name})"
+    $log.info "Room Leave. (#{scope.get_name})"
     @encre.event.room_leave(client, scope)
   end
 
@@ -170,16 +183,16 @@ class Application < Red5::MultiThreadedApplicationAdapter
   # end
 
   def streamBroadcastClose(stream)
-    puts "streamBroadcastClose (#{stream.class})"
+    $log.info "streamBroadcastClose (#{stream.class})"
     @encre.event.stream_stopped(stream)
 
     if stream.get_save_filename
-      puts "FIXME: Should push the file on the platform"
+      $log.warn "FIXME: Should push the file on the platform"
     end
   end
 
   def streamBroadcastStart(stream)
-    puts "streamBroadcastStart (#{stream.class})"
+    $log.info "streamBroadcastStart (#{stream.class})"
     @encre.event.stream_started(stream)
 
     if @encre.auth.stream_record(stream)
@@ -190,47 +203,47 @@ class Application < Red5::MultiThreadedApplicationAdapter
   end
 
   def streamPlayItemPause(stream, item, position)
-    puts "streamPlayItemPause (#{stream.class})"
+    $log.info "streamPlayItemPause (#{stream.class})"
   end
 
   def streamPlayItemPlay(stream, item, isLive)
-    puts "streamPlayItemPlay (#{stream.class})"
+    $log.info "streamPlayItemPlay (#{stream.class})"
   end
 
   def streamPlayItemResume(stream, item, position)
-    puts "streamPlayItemResume (#{stream.class})"
+    $log.info "streamPlayItemResume (#{stream.class})"
   end
 
   def streamPlayItemSeek(stream, item, position)
-    puts "streamPlayItemSeek (#{stream.class})"
+    $log.info "streamPlayItemSeek (#{stream.class})"
   end
 
   def streamPlayItemStop(stream, item)
-    puts "streamPlayItemStop (#{stream.class})"
+    $log.info "streamPlayItemStop (#{stream.class})"
   end
 
   def streamPublishStart(stream)
-    puts "streamPublishStart (#{stream.class})"
+    $log.info "streamPublishStart (#{stream.class})"
   end
 
   def streamRecordStart(stream)
-    puts "streamRecordStart (#{stream.class})"
+    $log.info "streamRecordStart (#{stream.class})"
   end
 
   def streamSubscriberClose(stream)
-    puts "streamSubscriberClose (#{stream.class})"
+    $log.info "streamSubscriberClose (#{stream.class})"
     # @encre.event.stream_unwatched(stream)
   end
 
   def streamSubscriberStart(stream)
-    puts "streamSubscriberStart (#{stream.class})"
+    $log.info "streamSubscriberStart (#{stream.class})"
     # @encre.event.stream_watched(stream)
   end
 
   ############## End of IStreamAwareScopeHandler
 
   def addChildScope(scope)
-    puts "Added a scope: #{scope.get_name}(#{scope.inspect}, #{scope.class})"
+    $log.info "Added a scope: #{scope.get_name}(#{scope.inspect}, #{scope.class})"
     true
   end
 

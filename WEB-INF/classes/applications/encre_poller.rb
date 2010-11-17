@@ -54,15 +54,34 @@ end
 class Poller
   include Red5::IScheduledJob
 
-  def initialize(app)
-    @app = app
+  def initialize(application)
+    @application = application
     @mutex = Mutex.new
+  end
+  
+  def videostream_kicked_event(metadatas)
+    @application.get_child_scope_names.each do |child_name|
+      child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
+      $log.debug "I've found: #{child_name}"
+      child = @application.get_child_scope child_name.to_s
+      $log.debug "child: #{child}"
+      child.get_clients.each do |client|
+        $log.info "client: #{client}"
+        if client.has_attribute('encre_token')
+          if client.get_attribute('encre_token') == metadatas['eutoken'] && child.get_name == metadatas['room']
+            client.disconnect
+            $log.info "Client: #{metadatas['token']} was kicked from Room: #{metadatas['room']}"
+            return
+         end
+        end
+      end
+      $log.info "None Client with Token: #{metadatas['token']} Room: #{metadatas['room']}"
+    end
   end
 
   def execute(service)
     if @mutex.try_lock
       begin
-
         events = ApiEvent.all
         if events
           events_ids = events.map {|x| x.id}
@@ -70,7 +89,15 @@ class Poller
           events.each do |x|
             $log.info "Received a json event via db"
             $log.info "#{x.id} :: #{x.event}"
-
+            result = JSON.parse(x.event)
+            $log.info "Event type: #{result['event']['type']}"
+            if self.class.method_defined? result['event']['type'] #&& result['event']['metadatas']
+              $log.info "Event found."
+              $log.info "Metadatas : (#{result['event']['metadatas']})"
+              send(result['event']['type'], result['event']['metadatas'])
+            else
+              $log.info "No event or metadata found."
+            end
           end
         end
       rescue
@@ -79,7 +106,7 @@ class Poller
       @mutex.unlock
     end
   end
-
+  
 
 
 end

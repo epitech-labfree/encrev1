@@ -198,7 +198,7 @@ class Application < Red5::MultiThreadedApplicationAdapter
     if @encre.auth.stream_record(stream)
       scope = stream.get_scope.get_name
       token = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'encre_token'
-      stream.save_as "#{scope}__#{token}", true
+      stream.save_as "#{scope}_#{rand(99999999999999999999)}_#{token}", true
     end
   end
 

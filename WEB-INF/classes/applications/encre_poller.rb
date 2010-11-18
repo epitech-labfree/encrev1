@@ -58,6 +58,38 @@ class Poller
     @application = application
     @mutex = Mutex.new
   end
+
+  def videostream_muteaudio(metadatas)
+    $log.info "mute video event"
+    @application.get_child_scope_names.each do |child_name|
+      child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
+      $log.debug "I've found: #{child_name}"
+      child = @application.get_child_scope child_name.to_s
+      $log.info "child: #{child}"
+      if stream = @application.subscriber.get_stream(metadatas['id_stream'], metadatas['eutoken'])
+        stream.receive_audio(false)
+        $log.info "Done !"
+      else
+        $log.info "No subscriber found."
+      end
+    end
+  end
+
+  def videostream_mutevideo(metadatas)
+    $log.info "mute video event"
+    @application.get_child_scope_names.each do |child_name|
+      child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
+      $log.debug "I've found: #{child_name}"
+      child = @application.get_child_scope child_name.to_s
+      $log.info "child: #{child}"
+      if stream = @application.subscriber.get_stream(metadatas['id_stream'], metadatas['eutoken'])
+        stream.receive_video(false)
+        $log.info "Done !"
+      else
+        $log.info "No subscriber found."
+      end
+    end
+  end
   
   def videostream_kicked_event(metadatas)
     @application.get_child_scope_names.each do |child_name|

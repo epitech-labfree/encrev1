@@ -35,8 +35,10 @@ require 'rubygems'
 #puts ENV['RED5_HOME'] + "/webapps/encrev1/WEB-INF/classes/applications/"
 APP_ROOT = ENV['RED5_HOME'] + "/webapps/encrev1/"
 $:.unshift APP_ROOT + "WEB-INF/classes/applications/"
+
 require 'encre_auth'
 require 'encre_poller'
+require 'encre_stream'
 
 #logger
 require 'logger'
@@ -68,8 +70,8 @@ end
 class Application < Red5::MultiThreadedApplicationAdapter
   #include Red5::IStreamAwareScopeHandler
 
-  attr_reader :appScope, :serverStream
-  attr_writer :appScope, :serverStream
+  attr_reader :appScope, :serverStream, :subscriber
+  attr_writer :appScope, :serverStream, :subscriber
 
   def initialize
     #call super to init the superclass, in this case a Java class
@@ -79,6 +81,7 @@ class Application < Red5::MultiThreadedApplicationAdapter
     options = YAML::load_file APP_ROOT + '/api/platform.yml'
     $log.debug "options : #{options}"
     @encre = Encre::Platform::connect options
+    @subscriber = Subscriber.new
   end
 
   def appStart(app)
@@ -237,6 +240,11 @@ class Application < Red5::MultiThreadedApplicationAdapter
 
   def streamSubscriberStart(stream)
     $log.info "streamSubscriberStart (#{stream.class})"
+    scope = stream.get_scope.get_name
+    token = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'encre_token'
+    $log.info "stream scope (#{scope}) token (#{token})"
+    @subscriber.add_stream_subscriber(stream, scope, token)
+    @subscriber.show_stream_list
     # @encre.event.stream_watched(stream)
   end
 

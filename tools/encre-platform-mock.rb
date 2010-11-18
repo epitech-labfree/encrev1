@@ -53,8 +53,8 @@ conf = {:red5_token => 'Keiqu0Iecouc4kiYuaF6ea3u',
                                                              'room2' => false}}}}
 
 
-get '/token/get' do
-  {:token => conf[:red5_token]}.to_json
+put '/presence/af83/encre-video' do
+  {:result => conf[:red5_token]}.to_json
 end
 
 get "/token/:btoken/isvalid" do
@@ -69,8 +69,8 @@ get "/token/:btoken/isvalid" do
   {:error => 'not_authorized'}.to_json
 end
 
-post "/event/push?" do
-  puts "Token is #{params['token']}"
+put "/event/af83?" do
+  puts "Token is #{params['eutoken']}"
   puts @request.body.string
   {:ok => 'i got it'}.to_json
 end

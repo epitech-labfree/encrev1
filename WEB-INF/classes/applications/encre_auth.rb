@@ -188,7 +188,7 @@ module Encre
         r = RestClient.put "#{@url}/presence/af83/encre-video?auth=token&credential=#{@conf.token}", ''
         @conf.sid = JSON.parse(r.to_str)['result']
         if @conf.sid
-          puts "... Authorizarion token is #{@conf.sid}"
+          $log.info "... Authorizarion token is #{@conf.sid}"
         else
           @conf.sid = nil
         end

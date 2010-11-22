@@ -59,14 +59,46 @@ class Poller
     @mutex = Mutex.new
   end
 
-  def videostream_muteaudio(metadatas)
-    $log.info "mute video event"
+  def videostream_unmute_broadcast(metadatas)
+    $log.info "Unmute broadcast event"
     @application.get_child_scope_names.each do |child_name|
       child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
       $log.debug "I've found: #{child_name}"
       child = @application.get_child_scope child_name.to_s
       $log.info "child: #{child}"
-      if stream = @application.subscriber.get_stream(metadatas['id_stream'], metadatas['eutoken'])
+      if stream = @application.streamer.get_stream_broadcast(metadatas['id_stream'], metadatas['eutoken'])
+        stream.start
+        $log.info "Done !"
+      else
+        $log.info "No broadcast found."
+      end
+    end
+  end
+
+  def videostream_mute_broadcast(metadatas)
+    $log.info "Mute broadcast event"
+    @application.get_child_scope_names.each do |child_name|
+      child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
+      $log.debug "I've found: #{child_name}"
+      child = @application.get_child_scope child_name.to_s
+      $log.info "child: #{child}"
+      if stream = @application.streamer.get_stream_broadcast(metadatas['id_stream'], metadatas['eutoken'])
+        stream.stop
+        $log.info "Done !"
+      else
+        $log.info "No broadcast found."
+      end
+    end
+  end
+
+  def videostream_muteaudio_subscriber(metadatas)
+    $log.info "Mute audio subscriber event"
+    @application.get_child_scope_names.each do |child_name|
+      child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
+      $log.debug "I've found: #{child_name}"
+      child = @application.get_child_scope child_name.to_s
+      $log.info "child: #{child}"
+      if stream = @application.streamer.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
         stream.receive_audio(false)
         $log.info "Done !"
       else
@@ -75,15 +107,47 @@ class Poller
     end
   end
 
-  def videostream_mutevideo(metadatas)
-    $log.info "mute video event"
+  def videostream_unmuteaudio_subscriber(metadatas)
+    $log.info "Unmute audio subscriber event"
     @application.get_child_scope_names.each do |child_name|
       child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
       $log.debug "I've found: #{child_name}"
       child = @application.get_child_scope child_name.to_s
       $log.info "child: #{child}"
-      if stream = @application.subscriber.get_stream(metadatas['id_stream'], metadatas['eutoken'])
+      if stream = @application.streamer.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
+        stream.receive_audio(true)
+        $log.info "Done !"
+      else
+        $log.info "No subscriber found."
+      end
+    end
+  end
+
+  def videostream_mutevideo_subscriber(metadatas)
+    $log.info "Mute video subscriber event"
+    @application.get_child_scope_names.each do |child_name|
+      child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
+      $log.debug "I've found: #{child_name}"
+      child = @application.get_child_scope child_name.to_s
+      $log.info "child: #{child}"
+      if stream = @application.streamer.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
         stream.receive_video(false)
+        $log.info "Done !"
+      else
+        $log.info "No subscriber found."
+      end
+    end
+  end
+
+  def videostream_unmutevideo_subscriber(metadatas)
+    $log.info "Unmute video subscriber event"
+    @application.get_child_scope_names.each do |child_name|
+      child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
+      $log.debug "I've found: #{child_name}"
+      child = @application.get_child_scope child_name.to_s
+      $log.info "child: #{child}"
+      if stream = @application.streamer.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
+        stream.receive_video(true)
         $log.info "Done !"
       else
         $log.info "No subscriber found."
@@ -92,6 +156,7 @@ class Poller
   end
   
   def videostream_kicked_event(metadatas)
+    $log.info "Kick subscriber event"
     @application.get_child_scope_names.each do |child_name|
       child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
       $log.debug "I've found: #{child_name}"

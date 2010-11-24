@@ -75,7 +75,7 @@ module Encre
   end
 
   class Platform
-    attr_reader :auth, :event, :conf
+    attr_reader :auth, :event, :conf, :file
 
     def self.connect(o = {})
       options = {:server => 'localpwet', :port => 4657, :method => 'http', :prefix => ''}.merge o
@@ -88,6 +88,7 @@ module Encre
       @conf = conf
       @auth = Encre::Auth.new(@conf)
       @event = Encre::Event.new(@conf)
+#      @file = Encre::File.new(@conf)
     end
   end
 
@@ -96,6 +97,32 @@ module Encre
       @conf = conf
       @url = "#{@conf.method}://#{@conf.server}:#{@conf.port}#{@conf.prefix}"
     end
+
+    # file upload, should be in different class File
+    def file_upload(file)
+      file["//"] = "/"
+      file = ENV['RED5_HOME'] + "/webapps/encrev1/#{file}"
+      request_url = "#{@url}/file/af83/demo"
+      response = RestClient.put request_url, ""
+      $log.info "Request filename ..."
+      file_name = JSON.parse(response.to_str)['result']
+      if file_name
+        request_url = "#{@url}/file/af83/demo/"
+        request_url += file_name
+        $log.info "Upload (#{file}) to Encre : #{request_url}"
+        response = RestClient.put request_url, File.read(file), :content_type => 'application/x-shockwave-flash'
+        $log.info "Delete #{file} ..."
+        file = File.delete(file)
+      else
+        file_name = nil
+      end
+    rescue
+      file_name = nil
+      $log.info "... failed ! (check exception below)"
+      $log.info $!      
+    end
+
+
 
     # def event(euid, token, type, metadatas = {} , id = "", eventlink = "")
     # The event must have been validated by the encre platform server before pushing it (isvalid?)
@@ -256,6 +283,31 @@ module Encre
     end
 
   end
+
+  # class File
+  #   def initialize(conf)
+  #     @conf = conf
+  #     @url = "#{@conf.method}://#{@conf.server}:#{@conf.port}#{@conf.prefix}"
+  #   end
+    
+  #   def upload(file)
+  #     request_url = "#{@url}/file/af83/demo"
+  #     response = RestClient.put request_url, ""
+  #     $log.info "Request filename ..."
+  #     file_name = JSON.parse(response.to_str)['result']
+  #     if file_name
+  #       $log.info "... filename : #{file_name}"
+  #       request_url = "#{@url}/file/af83/demo/file_test.flv"
+  #       response = RestClient.put request_url, File.read(file), :content_type => 'application/x-shockwave-flash'
+  #     else
+  #       file_name = nil
+  #     end
+  #   rescue
+  #     file_name = nil
+  #     $log.info "... failed ! (check exception below)"
+  #     $log.info $!      
+  #   end
+  # end
 
 end
 

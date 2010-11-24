@@ -74,3 +74,17 @@ put "/event/af83?" do
   puts @request.body.string
   {:ok => 'i got it'}.to_json
 end
+
+put "/file/af83/demo/:file_name" do
+  puts "File name : #{params[:file_name]}"
+  path = File.join("./streams/", params[:file_name])
+  File.open(path, "wb") { |f| f.write(request.body.read) }
+end
+
+put "/file/af83/demo" do
+  file_name = "Encre_#{rand(99999999999999999)}.flv"
+  puts "File name is #{file_name}"
+  {:result => file_name}.to_json
+end
+
+

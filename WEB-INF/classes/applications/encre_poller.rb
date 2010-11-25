@@ -63,31 +63,27 @@ class Poller
     $log.info "Unmute broadcast event"
     @application.get_child_scope_names.each do |child_name|
       child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
-      $log.debug "I've found: #{child_name}"
       child = @application.get_child_scope child_name.to_s
-      $log.info "child: #{child}"
-      if stream = @application.streamer.get_stream_broadcast(metadatas['id_stream'], metadatas['eutoken'])
-        stream.start
-        $log.info "Done !"
-      else
-        $log.info "No broadcast found."
+      @application.subscriber.subscriber.each do |subscriber|
+        subscriber[:stream].receive_video(true)
+        subscriber[:stream].receive_audio(true)
+        $log.info "Subscriber scope:(#{subscriber[:scope]}) token:(#{subscriber[:token]}) video unmuted."
       end
+      $log.info "Done !"
     end
   end
 
   def videostream_mute_broadcast(metadatas)
-    $log.info "Mute broadcast event"
+    $log.info "mute broadcast event"
     @application.get_child_scope_names.each do |child_name|
       child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
-      $log.debug "I've found: #{child_name}"
       child = @application.get_child_scope child_name.to_s
-      $log.info "child: #{child}"
-      if stream = @application.streamer.get_stream_broadcast(metadatas['id_stream'], metadatas['eutoken'])
-        stream.stop
-        $log.info "Done !"
-      else
-        $log.info "No broadcast found."
+      @application.subscriber.subscriber.each do |subscriber|
+        subscriber[:stream].receive_video(false)
+        subscriber[:stream].receive_audio(false)
+        $log.info "Subscriber scope:(#{subscriber[:scope]}) token:(#{subscriber[:token]}) video unmuted."
       end
+      $log.info "Done !"
     end
   end
 
@@ -95,10 +91,8 @@ class Poller
     $log.info "Mute audio subscriber event"
     @application.get_child_scope_names.each do |child_name|
       child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
-      $log.debug "I've found: #{child_name}"
       child = @application.get_child_scope child_name.to_s
-      $log.info "child: #{child}"
-      if stream = @application.streamer.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
+      if stream = @application.subscriber.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
         stream.receive_audio(false)
         $log.info "Done !"
       else
@@ -114,7 +108,7 @@ class Poller
       $log.debug "I've found: #{child_name}"
       child = @application.get_child_scope child_name.to_s
       $log.info "child: #{child}"
-      if stream = @application.streamer.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
+      if stream = @application.subscriber.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
         stream.receive_audio(true)
         $log.info "Done !"
       else
@@ -127,10 +121,8 @@ class Poller
     $log.info "Mute video subscriber event"
     @application.get_child_scope_names.each do |child_name|
       child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
-      $log.debug "I've found: #{child_name}"
       child = @application.get_child_scope child_name.to_s
-      $log.info "child: #{child}"
-      if stream = @application.streamer.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
+      if stream = @application.subscriber.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
         stream.receive_video(false)
         $log.info "Done !"
       else
@@ -143,10 +135,8 @@ class Poller
     $log.info "Unmute video subscriber event"
     @application.get_child_scope_names.each do |child_name|
       child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
-      $log.debug "I've found: #{child_name}"
       child = @application.get_child_scope child_name.to_s
-      $log.info "child: #{child}"
-      if stream = @application.streamer.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
+      if stream = @application.subscriber.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
         stream.receive_video(true)
         $log.info "Done !"
       else

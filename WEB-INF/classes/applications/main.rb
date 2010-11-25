@@ -70,8 +70,8 @@ end
 class Application < Red5::MultiThreadedApplicationAdapter
   #include Red5::IStreamAwareScopeHandler
 
-  attr_reader :appScope, :serverStream, :streamer
-  attr_writer :appScope, :serverStream, :streamer
+  attr_reader :appScope, :serverStream, :subscriber
+  attr_writer :appScope, :serverStream, :subscriber
 
   def initialize
     #call super to init the superclass, in this case a Java class
@@ -81,7 +81,7 @@ class Application < Red5::MultiThreadedApplicationAdapter
     options = YAML::load_file APP_ROOT + '/api/platform.yml'
     $log.debug "options : #{options}"
     @encre = Encre::Platform::connect options
-    @streamer = Streamer.new
+    @subscriber = Subscriber.new
   end
 
   def appStart(app)
@@ -192,7 +192,6 @@ class Application < Red5::MultiThreadedApplicationAdapter
     if stream.get_save_filename
       $log.info "Stream file name : (#{stream.get_save_filename})"
       @encre.event.file_upload(stream.get_save_filename)
-      $log.warn "FIXME: Should push the file on the platform"
     end
   end
 
@@ -205,8 +204,6 @@ class Application < Red5::MultiThreadedApplicationAdapter
       token = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'encre_token'
       stream.save_as "#{scope}_#{rand(99999999999999999999)}_#{token}", true
     end
-    @streamer.add_stream_broadcast(stream, scope, token)
-    @streamer.show_stream_broadcast
   end
 
   def streamPlayItemPause(stream, item, position)
@@ -238,11 +235,11 @@ class Application < Red5::MultiThreadedApplicationAdapter
   end
 
   def streamSubscriberClose(stream)
+    @subscriber.del_stream_subscriber(stream, scope, token)
     $log.info "streamSubscriberClose (#{stream.class})"
     scope = stream.get_scope.get_name
     token = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'encre_token'
-    @streamer.del_stream_subscriber(stream, scope, token)
-    @streamer.show_stream_subscriber
+    @subscriber.show_stream_subscriber
     # @encre.event.stream_unwatched(stream)
   end
 
@@ -250,8 +247,8 @@ class Application < Red5::MultiThreadedApplicationAdapter
     $log.info "streamSubscriberStart (#{stream.class})"
     scope = stream.get_scope.get_name
     token = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'encre_token'
-    @streamer.add_stream_subscriber(stream, scope, token)
-    @streamer.show_stream_subscriber
+    @subscriber.add_stream_subscriber(stream, scope, token)
+    @subscriber.show_stream_subscriber
     # @encre.event.stream_watched(stream)
   end
 

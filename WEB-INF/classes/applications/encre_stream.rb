@@ -15,11 +15,12 @@ module Red5
 end
 
 
-class Streamer
+class Subscriber
+  attr_reader :subscriber
+
 
   def initialize
     @subscriber = []
-    @broadcast = []
   end
 
   def add_stream_subscriber(stream, scope, token)
@@ -44,35 +45,6 @@ class Streamer
   
   def get_stream_subscriber(scope, token)
     @subscriber.each do |e|
-      if e[:scope] == scope && e[:token]
-        return e[:stream]
-      end
-    end
-    return false
-  end
-
-  def add_stream_broadcast(stream, scope, token)
-    e = {:stream => stream,
-                :scope => scope,
-                :token => token }
-    @broadcast.push(e)
-  end
-
-  def del_stream_broadcast(stream, scope, token)
-        e = {:stream => stream,
-                :scope => scope,
-                :token => token }
-    @broadcast.pop(e)
-  end
-
-  def show_stream_broadcast
-    @broadcast.each do |e|
-      $log.info "Broadcast: scope #{e[:scope]}, token #{e[:token]}"
-    end
-  end
-  
-  def get_stream_broadcast(scope, token)
-    @broadcast.each do |e|
       if e[:scope] == scope && e[:token]
         return e[:stream]
       end

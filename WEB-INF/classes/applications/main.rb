@@ -235,10 +235,10 @@ class Application < Red5::MultiThreadedApplicationAdapter
   end
 
   def streamSubscriberClose(stream)
-    @subscriber.del_stream_subscriber(stream, scope, token)
     $log.info "streamSubscriberClose (#{stream.class})"
     scope = stream.get_scope.get_name
     token = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'encre_token'
+    @subscriber.del_stream_subscriber(stream, scope, token)
     @subscriber.show_stream_subscriber
     # @encre.event.stream_unwatched(stream)
   end

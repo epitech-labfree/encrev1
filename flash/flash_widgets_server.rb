@@ -29,6 +29,11 @@ require 'sinatra'
 
 set :haml, {:format => :html5 }
 
+before do
+    headers['Cache-Control'] = 'no-cache'
+end
+
+
 get '/' do
   haml :index
 end

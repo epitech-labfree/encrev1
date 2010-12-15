@@ -119,7 +119,7 @@ module Encre
     rescue
       file_name = nil
       $log.info "... failed ! (check exception below)"
-      $log.info $!      
+      $log.info $!
     end
 
 
@@ -210,9 +210,9 @@ module Encre
     end
 
     def server(scope)
-      $log.info "Authorizing from ENCRE server (#{scope.get_path}) on #{@url}/presence/af83/encre-video ..."
+      $log.info "Authorizing from ENCRE server (#{scope.get_path}) on #{@url}/presence/encre-video ..."
       begin
-        r = RestClient.put "#{@url}/presence/af83/encre-video?auth=token&credential=#{@conf.token}", ''
+        r = RestClient.put "#{@url}/presence/encre-video?auth=token&credential=#{@conf.token}", ''
         @conf.sid = JSON.parse(r.to_str)['result']
         if @conf.sid
           $log.info "... Authorizarion token is #{@conf.sid}"
@@ -289,7 +289,7 @@ module Encre
   #     @conf = conf
   #     @url = "#{@conf.method}://#{@conf.server}:#{@conf.port}#{@conf.prefix}"
   #   end
-    
+
   #   def upload(file)
   #     request_url = "#{@url}/file/af83/demo"
   #     response = RestClient.put request_url, ""
@@ -305,7 +305,7 @@ module Encre
   #   rescue
   #     file_name = nil
   #     $log.info "... failed ! (check exception below)"
-  #     $log.info $!      
+  #     $log.info $!
   #   end
   # end
 

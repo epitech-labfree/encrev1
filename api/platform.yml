@@ -1,7 +1,7 @@
 :server: localhost
-:port: 4567
+:port: 8888
 :method: http
 :prefix:
-:token: token_server_will_be_there
+:token: d713ab03c0280f82709f865ffa2240a38c26f09e
 :logger: logfile.log
 :loglvl: DEBUG

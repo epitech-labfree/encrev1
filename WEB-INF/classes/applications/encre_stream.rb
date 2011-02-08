@@ -34,7 +34,7 @@ class Subscriber
         e = {:stream => stream,
                 :scope => scope,
                 :token => token }
-    @subscriber.pop(e)
+    @subscriber.delete(e)
   end
 
   def show_stream_subscriber

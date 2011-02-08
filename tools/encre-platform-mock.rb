@@ -77,7 +77,7 @@ end
 
 put "/file/af83/demo/:file_name" do
   puts "File name : #{params[:file_name]}"
-  path = File.join("./streams/", params[:file_name])
+  path = File.join("./", params[:file_name])
   File.open(path, "wb") { |f| f.write(request.body.read) }
 end
 

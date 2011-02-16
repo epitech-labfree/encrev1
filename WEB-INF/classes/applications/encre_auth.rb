@@ -63,13 +63,14 @@ end
 
 module Encre
   class Conf
-    attr_accessor :server, :port, :token, :method, :prefix, :sid
+    attr_accessor :server, :port, :uid, :token, :method, :prefix, :sid
     def initialize(options)
       @server = options[:server]
       @port = options[:port]
       @method = options[:method]
       @prefix = options[:prefix]
       @token = options[:token]
+      @uid = options[:uid]
     end
 
   end
@@ -102,13 +103,17 @@ module Encre
     def file_upload(file)
       file["//"] = "/"
       file = ENV['RED5_HOME'] + "/webapps/encrev1/#{file}"
-      request_url = "#{@url}/file/af83/demo"
+      request_url = "#{@url}/file/demo"
+      request_url += "?uid=#{@conf.uid}&sid=#{@conf.sid}"
+      $log.info "Request filename : #{request_url}"
       response = RestClient.put request_url, ""
-      $log.info "Request filename ..."
+      $log.info "--> Got reponse : #{respone}"
       file_name = JSON.parse(response.to_str)['result']
       if file_name
-        request_url = "#{@url}/file/af83/demo/"
+        $log.info "--> Got filename : #{file_name}"
+        request_url = "#{@url}/file/demo/"
         request_url += file_name
+        request_url += "?uid=#{@conf.uid}&sid=#{@conf.sid}"
         $log.info "Upload (#{file}) to Encre : #{request_url}"
         response = RestClient.put request_url, File.read(file), :content_type => 'application/x-shockwave-flash'
         $log.info "Delete #{file} ..."
@@ -127,11 +132,11 @@ module Encre
     # def event(euid, token, type, metadatas = {} , id = "", eventlink = "")
     # The event must have been validated by the encre platform server before pushing it (isvalid?)
     def event(event)
-      e = { :metadata => "" }
+      e = { :type => "" }
       e.merge! event
 
-      request_url = "#{@url}/event/af83?"
-      request_url += "euid=encre-video&esid=#{@conf.sid}"
+      request_url = "#{@url}/event/demo?"
+      request_url += "uid=#{@conf.uid}&sid=#{@conf.sid}"
       request_url += "&" + e.url_encode
       response = RestClient.put request_url, ""
       $log.info "Sending an event to encre: #{request_url}"
@@ -147,10 +152,10 @@ module Encre
       token = client.get_attribute 'encre_token'
 
       event(:type => type,
-            :metadata => {:eutoken => token,
+            :eutoken => token,
               :path => stream.get_scope.get_path,
               :room => stream.get_scope.get_name,
-              :name => stream.get_published_name })
+              :name => stream.get_published_name )
     end
 
     def stream_watched(stream)
@@ -174,14 +179,14 @@ module Encre
       return false unless conn.get_client.has_attribute('encre_token')
       token = conn.get_client.get_attribute('encre_token').to_s
 
-      event(:type => 'videochat_serverconnect_event', :metadata => {:eutoken => token})
+      event(:type => 'videochat_serverconnect_event', :eutoken => token)
     end
 
     def server_disconnect(conn)
       return false unless conn.get_client.has_attribute('encre_token')
       token = conn.get_client.get_attribute('encre_token').to_s
 
-      event(:type => 'videochat_serverdisconnect_event', :metadata => {:eutoken => token})
+      event(:type => 'videochat_serverdisconnect_event', :eutoken => token)
     end
 
     def room_join(client, scope)
@@ -189,8 +194,8 @@ module Encre
       token = client.get_attribute('encre_token').to_s
 
       event(:type => 'videochat_roomjoin_event',
-            :metadata => {:path => scope.get_path, :room => scope.get_name,
-              :eutoken => token })
+            :path => scope.get_path, :room => scope.get_name,
+              :eutoken => token )
     end
 
     def room_leave(client, scope)
@@ -198,8 +203,8 @@ module Encre
       token = client.get_attribute('encre_token').to_s
 
       event(:type => 'videochat_roomleave_event',
-            :metadata => {:path => scope.get_path, :room => scope.get_name,
-              :eutoken => token })
+            :path => scope.get_path, :room => scope.get_name,
+              :eutoken => token )
     end
   end
 
@@ -210,12 +215,13 @@ module Encre
     end
 
     def server(scope)
-      $log.info "Authorizing from ENCRE server (#{scope.get_path}) on #{@url}/presence/af83/encre-video ..."
+      $log.info "Authorizing from ENCRE server (#{scope.get_path}) on #{@url}/presence/#{@conf.uid} ..."
+      $log.info "With uid : [#{@conf.uid}] and token : [#{@conf.token}]."
       begin
-        r = RestClient.put "#{@url}/presence/af83/encre-video?auth=token&credential=#{@conf.token}", ''
+        r = RestClient.put "#{@url}/presence/#{@conf.uid}/?auth=token&credential=#{@conf.token}", ''
         @conf.sid = JSON.parse(r.to_str)['result']
         if @conf.sid
-          $log.info "... Authorizarion token is #{@conf.sid}"
+          $log.info "... Authorizarion sid is #{@conf.sid}"
         else
           @conf.sid = nil
         end

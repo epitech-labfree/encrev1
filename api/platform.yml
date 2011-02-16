@@ -1,7 +1,8 @@
 :server: localhost
-:port: 4567
+:port: 5280
 :method: http
-:prefix:
-:token: token_server_will_be_there
+:prefix: /api/0.2
+:uid: toto
+:token: toktoken
 :logger: logfile.log
 :loglvl: DEBUG

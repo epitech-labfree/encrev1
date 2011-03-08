@@ -8,19 +8,19 @@
     %script(src='history/history.js' language='javascript')
     %style body { margin: 0px; overflow:hidden }
   %body
-    %h1= "viewing stream #{params[:server]}/#{params[:room]}/#{params[:id]} (token: #{params[:token]})"
+    %h1= "viewing stream #{params[:server]}/#{params[:room]}/#{params[:id]} (uid: #{params[:uid]} / sid: #{params[:sid]})"
     #flash
       %noscript
         %object(classid='clsid:D27CDB6E-AE6D-11cf-96B8-444553540000' id='receive_video')
           %param
           %param(name='quality' value='high')
           %param(name='server' value="#{params[:server]}")
-          %embed(src="receive_video.swf?streamtype=live&server=#{@full_url}&token=#{params[:token]}")
+          %embed(src="receive_video.swf?streamtype=live&server=#{@full_url}&uid=#{params[:uid]}&sid=#{params[:sid]}")
 
     :javascript
       AC_FL_RunContent(
-      "src", "receive_video?stream=#{params[:id]}&streamtype=live&server=#{@full_url}&width=640&height=480&token=#{params[:token]}",
-      "flashvars", "stream=#{params[:id]}&streamtype=live&server=#{@full_url}&width=640&height=480&token=#{params[:token]}",
+      "src", "receive_video?stream=#{params[:id]}&streamtype=live&server=#{@full_url}&width=640&height=480&uid=#{params[:uid]}&sid=#{params[:sid]}",
+      "flashvars", "stream=#{params[:id]}&streamtype=live&server=#{@full_url}&width=640&height=480&uid=#{params[:uid]}&sid=#{params[:sid]}",
       "width", "100%",
       "height", "100%",
       "align", "middle",

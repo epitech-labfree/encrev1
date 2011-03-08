@@ -31,7 +31,8 @@ package org.rtmpy.examples.simple.receiveVideo
   {
     private var videoURL		: String = "DidNotProvideStreamName";
     private var _rtmpURL		: String = "rtmp://localhost/encrev1";
-    private var _encre_token		: String = "I_did_not_supplied_any_token_but_i_should_have";
+    private var _encre_sid		: String = "I_did_not_supplied_any_sid_but_i_should_have";
+    private var _encre_uid		: String = "I_did_not_supplied_any_uid_but_i_should_have";
     //private var videoURL		: String = this.application.parameters.stream;
     //private var _rtmpURL		: String = 'rtmp://'+Application.application.parameters.server+'/oflaDemo';
     private var connection		: NetConnection;
@@ -392,10 +393,12 @@ package org.rtmpy.examples.simple.receiveVideo
       connection.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
 
       _rtmpURL = getparam('server');
-      _encre_token = getparam('token', 'I_did_not_supplied_any_token_but_i_should_have');
+      _encre_uid = getparam('uid', 'I_did_not_supplied_any_uid_but_i_should_have');
+      _encre_sid = getparam('sid', 'I_did_not_supplied_any_sid_but_i_should_have');
       trace(String(_rtmpURL));
-      trace(String(_encre_token));
-      connection.connect(_rtmpURL, _encre_token);
+      trace(String(_encre_uid));
+      trace(String(_encre_sid));
+      connection.connect(_rtmpURL, _encre_uid, _encre_sid);
       connected = true;
     }
 

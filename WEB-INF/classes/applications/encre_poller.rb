@@ -67,7 +67,7 @@ class Poller
       @application.subscriber.subscriber.each do |subscriber|
         subscriber[:stream].receive_video(true)
         subscriber[:stream].receive_audio(true)
-        $log.info "Subscriber scope:(#{subscriber[:scope]}) token:(#{subscriber[:token]}) video unmuted."
+        $log.info "Subscriber scope:(#{subscriber[:scope]}) uid:(#{subscriber[:uid]}) video unmuted."
       end
       $log.info "Done !"
     end
@@ -81,7 +81,7 @@ class Poller
       @application.subscriber.subscriber.each do |subscriber|
         subscriber[:stream].receive_video(false)
         subscriber[:stream].receive_audio(false)
-        $log.info "Subscriber scope:(#{subscriber[:scope]}) token:(#{subscriber[:token]}) video unmuted."
+        $log.info "Subscriber scope:(#{subscriber[:scope]}) uid:(#{subscriber[:uid]}) video unmuted."
       end
       $log.info "Done !"
     end
@@ -92,7 +92,7 @@ class Poller
     @application.get_child_scope_names.each do |child_name|
       child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
       child = @application.get_child_scope child_name.to_s
-      if stream = @application.subscriber.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
+      if stream = @application.subscriber.get_stream_subscriber(metadatas['id_stream'], metadatas['uid'])
         stream.receive_audio(false)
         $log.info "Done !"
       else
@@ -108,7 +108,7 @@ class Poller
       $log.debug "I've found: #{child_name}"
       child = @application.get_child_scope child_name.to_s
       $log.info "child: #{child}"
-      if stream = @application.subscriber.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
+      if stream = @application.subscriber.get_stream_subscriber(metadatas['id_stream'], metadatas['uid'])
         stream.receive_audio(true)
         $log.info "Done !"
       else
@@ -122,7 +122,7 @@ class Poller
     @application.get_child_scope_names.each do |child_name|
       child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
       child = @application.get_child_scope child_name.to_s
-      if stream = @application.subscriber.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
+      if stream = @application.subscriber.get_stream_subscriber(metadatas['id_stream'], metadatas['uid'])
         stream.receive_video(false)
         $log.info "Done !"
       else
@@ -136,7 +136,7 @@ class Poller
     @application.get_child_scope_names.each do |child_name|
       child_name = child_name[1, child_name.length - 1] if child_name =~ /:/
       child = @application.get_child_scope child_name.to_s
-      if stream = @application.subscriber.get_stream_subscriber(metadatas['id_stream'], metadatas['eutoken'])
+      if stream = @application.subscriber.get_stream_subscriber(metadatas['id_stream'], metadatas['uid'])
         stream.receive_video(true)
         $log.info "Done !"
       else
@@ -154,15 +154,15 @@ class Poller
       $log.debug "child: #{child}"
       child.get_clients.each do |client|
         $log.info "client: #{client}"
-        if client.has_attribute('encre_token')
-          if client.get_attribute('encre_token') == metadatas['eutoken'] && child.get_name == metadatas['room']
+        if client.has_attribute('user_uid') && client.has_attribute('user_sid')
+          if client.get_attribute('user_uid') == metadatas['uid'] && child.get_name == metadatas['room']
             client.disconnect
-            $log.info "Client: #{metadatas['token']} was kicked from Room: #{metadatas['room']}"
+            $log.info "Client: #{metadatas['uid']} was kicked from Room: #{metadatas['room']}"
             return
          end
         end
       end
-      $log.info "None Client with Token: #{metadatas['token']} Room: #{metadatas['room']}"
+      $log.info "None Client with Uid: #{metadatas['uid']} Room: #{metadatas['room']}"
     end
   end
 

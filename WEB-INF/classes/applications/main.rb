@@ -112,12 +112,14 @@ class Application < Red5::MultiThreadedApplicationAdapter
   def appConnect(conn, params)
     $log.info "Connection: ENCRE VideoChat v1"
     $log.info "\tScope:#{conn.get_scope.get_path}"
-    $log.info "\tRoom:#{conn.get_scope.get_name}"
+    # if conn.get_scope.get_path == "/default/encrev1"
+    $log.info "\tMeeting:#{conn.get_scope.get_name}"
     if (params.length < 1)
-      $log.error "Didn't supplied the necessary parameters (connect(url, token);)"
+      $log.error "Didn't supplied the necessary parameters (connect(url, uid, sid);)"
       return false;
     end
-    $log.info "\tToken:#{params[0].to_s}"
+    $log.info "\tUid:#{params[0][0].to_s}"
+    $log.info "\tSid:#{params[0][1].to_s}"
 
     measureBandwidth(conn)
     if conn.instance_of?(Red5::IStreamCapableConnection)
@@ -201,8 +203,8 @@ class Application < Red5::MultiThreadedApplicationAdapter
 
     if @encre.auth.stream_record(stream)
       scope = stream.get_scope.get_name
-      token = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'encre_token'
-      stream.save_as "#{scope}_#{rand(99999999999999999999)}_#{token}", true
+      user_uid = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'user_uid'
+      stream.save_as "#{scope}_#{rand(99999999999999999999)}_#{user_uid}", true
     end
   end
 
@@ -237,8 +239,9 @@ class Application < Red5::MultiThreadedApplicationAdapter
   def streamSubscriberClose(stream)
     $log.info "streamSubscriberClose (#{stream.class})"
     scope = stream.get_scope.get_name
-    token = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'encre_token'
-    @subscriber.del_stream_subscriber(stream, scope, token)
+    user_uid = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'user_uid'
+    user_sid = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'user_sid'
+    @subscriber.del_stream_subscriber(stream, scope, user_uid, user_sid)
     @subscriber.show_stream_subscriber
     # @encre.event.stream_unwatched(stream)
   end
@@ -246,8 +249,9 @@ class Application < Red5::MultiThreadedApplicationAdapter
   def streamSubscriberStart(stream)
     $log.info "streamSubscriberStart (#{stream.class})"
     scope = stream.get_scope.get_name
-    token = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'encre_token'
-    @subscriber.add_stream_subscriber(stream, scope, token)
+    user_uid = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'user_uid'
+    user_sid = Java::OrgRed5ServerApi::Red5::get_connection_local.get_client.get_attribute 'user_sid'
+    @subscriber.add_stream_subscriber(stream, scope, user_uid, user_sid)
     @subscriber.show_stream_subscriber
     # @encre.event.stream_watched(stream)
   end

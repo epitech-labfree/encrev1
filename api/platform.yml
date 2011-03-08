@@ -1,8 +1,8 @@
 :server: localhost
 :port: 5280
 :method: http
-:prefix: /api/0.2
-:uid: toto
+:prefix: /api/0.3
+:uid: encre-video
 :token: toktoken
 :logger: logfile.log
 :loglvl: DEBUG

@@ -104,8 +104,8 @@ package org.rtmpy.examples.simple.vidPublish
 
       connection.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
       connection.objectEncoding = ObjectEncoding.AMF0;
-      connection.connect(getparam('server'), getparam('token', 'I_did_not_supply_a_token'));
-      trace("made connection " + getparam('server') + " with token " + getparam('token', 'I_did_not_supply_a_token'));
+      connection.connect(getparam('server'), getparam('uid', 'I_did_not_supply_a_uid'), getparam('sid', 'I_did_not_supply_a_sid'));
+      trace("made connection " + getparam('server') + " with uid " + getparam('uid', 'I_did_not_supply_a_uid') + "and sid" + getparam('sid', 'I_did_not_supply_a_sid'));
 
       connected = true;
     }

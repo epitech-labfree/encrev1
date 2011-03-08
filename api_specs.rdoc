@@ -23,18 +23,18 @@ events we emit via the platform, but this will be discussed in a
 specific section.
 
 The flash client api is really simple. All there is to do is to pass
-the red5 videochat component the client token when connecting as the
+the red5 videochat component the client uid and sid when connecting as the
 first connection parameters.
 
 Here is a code snippet from our example :
 
  connection = new FMSConnection();
- connection.connect('rtmp://videochatserver:port/encrev1/room/', 'TokenObtainedFromEncrePlatformServer');
+ connection.connect('rtmp://videochatserver:port/encrev1/room/', 'SidObtainedFromEncrePlatformServer', 'SidObtainedFromEncrePlatformServer');
  stream = new NetStream(connection);
  // [...] configuration of the camera, stream quality, path, etc.
  stream.publish(stream_name, stream_type);
 
-The token will be associated to the connection in the videochat
+The uid and sid will be associated to the connection in the videochat
 component and will be used to authorize on the encre platform the
 differents actions that are automatically performed by the component
 for that connection like publishing a stream, recording it, reading a
@@ -47,7 +47,7 @@ The videochat component
 === VideoChat => Encre events.
 
 These events are POSTed to the encre server via http on this method
- http://encre_server/event/push?token=videochat_own_auth_token
+ http://encre_server/event/meeting?uid=UidEncreBrick&sid=SidObtainedFromEncrePlatformServer
 
 ==== videochat_serverconnect_event
 *Authorized*. This is a low-level event. A client is connecting to the videochat server.
@@ -58,7 +58,7 @@ These events are POSTed to the encre server via http on this method
  "id" : "videochat_serverconnect_event_123465_86546",
  "eventLink" : "",
  "metadata" : {
-   "eutoken" : "theconcernedusertoken"
+   "uid" : "the_concerned_user_uid"
    }
  }}
 
@@ -71,7 +71,7 @@ This is a low-level event. A client is disconnecting from the videochat server.
  "id" : "videochat_serverconnect_event_123465_86546",
  "eventLink" : "",
  "metadata" : {
-   "eutoken" : "theconcernedusertoken"
+   "uid" : "the_concerned_user_uid"
    }
  }}
 
@@ -84,7 +84,7 @@ This is a low-level event. A client is disconnecting from the videochat server.
  "id" : "videochat_roomjoin_event_123465_89546",
  "eventLink" : "",
  "metadata" : {
-   "eutoken" : "theconcernedusertoken",
+   "uid" : "the_concerned_user_uid"
    "path" : "/default/encrev1",
    "room" : "room101"
    }}
@@ -100,7 +100,7 @@ A client is connecting from a specific room/path/scope of the server.
  "id" : "videochat_roomleave_event_123465_89546",
  "eventLink" : "",
  "metadata" : {
-   "eutoken" : "theconcernedusertoken",
+   "uid" : "the_concerned_user_uid"
    "path" : "/default/encrev1",
    "room" : "room101"
    }
@@ -115,7 +115,7 @@ A client is connecting from a specific room/path/scope of the server.
  "id" : "videochat_streamstarted_event_123465_86546",
  "eventLink" : "",
  "metadata" : {
-   "eutoken" : "theconcernedusertoken",
+   "uid" : "the_concerned_user_uid"
    "path" : "/default/encrev1/",
    "room" : "my_videochat_room3",
    "name" : "stream_name_like_john_doe"
@@ -132,7 +132,7 @@ A client has stopped to publish a stream in a particular room, this is the end o
  "id" : "videochat_streamstopped_event_123465_86546",
  "eventLink" : "",
  "metadata" : {
-   "eutoken" : "theconcernedusertoken",
+   "uid" : "the_concerned_user_uid"
    "path" : "/default/encrev1/",
    "room" : "my_videochat_room3",
    "name" : "stream_name_like_john_doe"
@@ -149,7 +149,7 @@ A client has stopped to publish a stream in a particular room, this is the end o
  "id" : "videochat_streamwatched_event_123465_86546",
  "eventLink" : "",
  "metadata" : {
-   "eutoken" : "theconcernedusertoken",
+   "uid" : "the_concerned_user_uid"
    "path" : "/default/encrev1/",
    "room" : "my_videochat_room3",
    "name" : "stream_name_like_john_doe"
@@ -166,7 +166,7 @@ A client stopped to read/watch a stream.
  "id" : "videochat_streamunwatched_event_123465_86546",
  "eventLink" : "",
  "metadata" : {
-   "eutoken" : "theconcernedusertoken",
+   "uid" : "the_concerned_user_uid"
    "path" : "/default/encrev1/",
    "room" : "my_videochat_room3",
    "name" : "stream_name_like_john_doe"
@@ -182,7 +182,7 @@ A client stopped to read/watch a stream.
  "id" : "videochat_streamrecorded_event_123465_86546",
  "eventLink" : "",
  "metadata" : {
-   "eutoken" : "theconcernedusertoken",
+   "uid" : "the_concerned_user_uid"
    "path" : "/default/encrev1/",
    "room" : "my_videochat_room3",
    "name" : "stream_name_like_john_doe",
@@ -199,11 +199,11 @@ videochat component behave the way they want.
 
 This is done by querying the following REST method on the ENCRE
 server:
- http://encre_server/token/videochat_own_token/isvalid?token=client_token&type=authpoint&scope=xxx
+ http://encre_server/user/{uid}/acl/roster/add/{meeting}
 
 The following list define the different authorization points and their
-scope parameter. In every auth point, the token parameter is the
-end-user token obtained by the user on the ENCRE server and
+scope parameter. In every auth point, the parameter is the
+end-user uid and sid obtained by the user on the ENCRE server and
 transmitted to the videochat component via the Flash Client API.
 
 Before any 'authorized' event to happen, it is authorized this
@@ -218,22 +218,6 @@ Is the client authorized to connect to the server?
 Is the client authorized to join the room ?
 
 * scope : the name of the joined room
-
-==== videochat_streamstarted
-Is the client authorized to publish a stream on the specified room ?
-
-* scope : the name of the room the event want to publish in
-
-==== videochat_streamwatched
-Is the client authorized to watch a stream in the specified room ?
-
-* scope : The room the user want to watch a stream in
-
-==== videochat_streamrecorded
-Is the videochat server allowed to record the stream of that user in the specified room ?
-
-* token : The token of the user the server wants to record
-* scope : The room in which is publied the stream the server wants to record
 
 === Encre => VideoChat events.
 
@@ -258,10 +242,10 @@ the specified room:
        , "id":""
        , "eventLink":""
        , "metadatas":
-           { "stream" : "thestreamname",
+           { "id_stream" : "thestreamname",
              "path" : "default/encrev1/organisationx/",
              "room" : "room101",
-             "eutoken":"token"
+	     "uid" : "the_concerned_user_uid"
            }
        }
    }

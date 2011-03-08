@@ -1,7 +1,8 @@
 :server: localhost
-:port: 8888
+:port: 5280
 :method: http
-:prefix:
-:token: d713ab03c0280f82709f865ffa2240a38c26f09e
+:prefix: /api/0.3
+:uid: encre-video
+:token: toktoken
 :logger: logfile.log
 :loglvl: DEBUG

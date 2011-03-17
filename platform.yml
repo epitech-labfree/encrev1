@@ -3,6 +3,6 @@
 :method: http
 :prefix: /api/0.3
 :uid: encre-video
-:token: toktoken
+:token: 123456
 :logger: logfile.log
 :loglvl: DEBUG

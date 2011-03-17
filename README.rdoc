@@ -69,9 +69,6 @@ required but will soon be. They are here as a reminder)
 * git-core
 * build-essential (iirc, it is only for GNU Make)
 * unzip
-* sqlite3
-* libsqlite3-0
-* libsqlite3-dev
 * ruby1.8
 * ruby1.8-dev
 * ruby
@@ -83,9 +80,6 @@ required but will soon be. They are here as a reminder)
   * haml
   * json
   * rest-client
-  * sqlite3-ruby
-  * activerecord (< 3.0.0)
-  * activesupport (< 3.0.0)
   * mongrel
 * The latest stable OpenSource Flex SDK from Adobe (http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+4)
 * Your favorite text editor
@@ -160,21 +154,6 @@ and issue the following command:
 
   $ cd ~/encre_video/encrev1/tools/ && ruby encre-platform-mock.rb
 
-==== Setting up the database and running the ENCRE Api entry point
-
-You must now setup the database used to communicate between the ENCRE
-Api entry point and the videochat application by issuing this command
-
-  $  ~/encre_video/encrev1/api && rake migrate #(or simply rake)
-
-If the rake command is not found, check the rake installation
-documentation for your distribution or you system, or the official
-rake documentation on the Internet.
-
-You may finally run the API entry point by issuing this command.
-
-  $ ~/encre_video/encrev1/api && ruby server.rb -p 9876
-
 ==== Building and running the demo client
 
 Code is sometimes more helpfull to developpers than tons of pages of
@@ -237,7 +216,39 @@ from the end)
 [no such file to load -- 'encre_auth'] The $RED_HOME environment variable is not properly set or you are not running the red5*sh scripts from the red5 directory.
 [no such file to load -- 'rest_client' or 'json'] The rest-client or json_pure gems are not installed or where not installed by the user who runs the applications (jruby gems are installed in ~/.gem/jruby, and on debian the systems gems are not where jruby expects them).
 
+== Ucengine setup
 
+...
+
+You first need to create an user for the encre-video component.
+
+  ./bin/ucectl user add --domain localhost --uid encre-video --auth password --credential '123456'
+  ./bin/ucectl acl add --domain localhost --uid encre-video --object presence --action add
+  ./bin/ucectl acl add --domain localhost --uid encre-video --object presence --action delete
+  ./bin/ucectl acl add --domain localhost --uid encre-video --object event --action list
+  ./bin/ucectl acl add --domain localhost --uid encre-video --object event --action get
+  ./bin/ucectl acl add --domain localhost --uid encre-video --object roster --action list
+
+Now update the api/platform.yml file with these informations. (edit the uid and token items, with the provided uid and credential)
+
+Then, uou might want to add some users to ucengine to be able to use the component, you will also need a meeting, and give some right on the meeting to these users.
+
+  ./bin/ucectl user add --domain localhost --uid toto --auth password --credential '123456'
+  ./bin/ucectl user add --domain localhost --uid tata --auth password --credential '123456'
+  ./bin/ucectl meeting add --domain localhost --name 'test-meeting'
+  ./bin/ucectl acl add --domain localhost --uid toto --object presence --action add
+  ./bin/ucectl acl add --domain localhost --uid toto --object presence --action delete
+  ./bin/ucectl acl add --domain localhost --uid tata --object presence --action add
+  ./bin/ucectl acl add --domain localhost --uid tata --object presence --action delete
+  ./bin/ucectl acl add --domain localhost --uid 'toto' --meeting 'test-meeting' --object 'roster' --action 'add'
+  ./bin/ucectl acl add --domain localhost --uid 'tata' --meeting 'test-meeting' --object 'roster' --action 'add'
+
+You now have a really simple setup to be able to use the Encre video v1 component.
+
+- ajouter un utilisateur pour red5 "encre-video" -> voir platform.yml
+- creer des utilisateurs de test (toto, tata)
+- cree un meeting de test "caca"
+- donne des droits d'acces au meeting a cet utilisateur (ucectl acl add -- ....) (voir la doc de ucengine, notamment les examples sur les acls)
 
 
 

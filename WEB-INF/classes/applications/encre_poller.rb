@@ -29,8 +29,6 @@ require 'yaml'
 require 'thread'
 require 'json'
 
-require 'active_record'
-
 module Red5
   include_package "org.red5.server.api"
   include_package "org.red5.server.api.scheduling"
@@ -40,15 +38,105 @@ module Red5
   include_package "org.red5.server.stream"
 end
 
-api_root = ENV['RED5_HOME'] + "/webapps/encrev1/api/"
-db_config = YAML::load(File.open(api_root + "database.yml"))
-db_config['database'] = api_root + db_config['database'] if db_config['adapter'] =~ /sqlite/
-db_config['adapter'] = 'jdbc' + db_config['adapter']
-
-ActiveRecord::Base.establish_connection(db_config)
-
 module Encre
-class ApiEvent < ActiveRecord::Base
+
+class UCLongPoller
+  attr_writer :running
+
+  def initialize(platform)
+    @encre = platform
+
+    @running = true
+    @mutex = Mutex.new
+    @q = Array.new
+    @timestamp = 0
+    @thread = Thread.new { self.run }
+  end
+
+  def run
+    begin
+      puts "Starting Encre Long Poller thread."
+      @timestamp = _get_time
+
+      while running? do
+        begin
+          res = _fetch
+
+          res.each do |e|
+            @timestamp = e['datetime'] + 1 if (e['datetime'] >= @timestamp)
+          end
+
+          if res.length > 0
+            @mutex.synchronize do
+              @q.push res
+              @q.flatten!
+            end
+          end
+        rescue
+          puts "Exception in UCLongPoller loop: #{$!}"
+          puts $!.backtrace
+        end
+      end
+    rescue
+      puts "Exception in EncreLongPoller thread : #{$!}"
+      puts $!.backtrace
+    end
+  end
+
+  def events(max = 10)
+    @mutex.synchronize do
+      if @q.length <= max
+        res = @q.dup
+        @q.clear
+        res
+      else
+        res = @q[0, max - 1]
+        @q = @q[max, @q.length]
+        res
+      end
+    end
+  end
+
+  def running?
+    @running
+  end
+
+  private
+  def _fetch
+    url = "#{_url}/event?#{_url_auth}&#{_event_types}&start=#{@timestamp}&_async=lp"
+    puts "## #{url}"
+    begin
+      res = RestClient.get url
+      res = JSON.parse res
+      puts res
+      res["result"]
+    rescue
+      []
+    end
+  end
+
+  def _get_time
+    puts "#{_url}/time"
+    res = RestClient.get "#{_url}/time"
+    res = JSON.parse res
+    res["result"].to_i
+
+  end
+
+  def _url
+    conf = @encre.conf
+    "#{conf.method}://#{conf.server}:#{conf.port}#{conf.prefix}"
+  end
+
+  def _url_auth
+    "uid=#{@encre.conf.uid}&sid=#{@encre.conf.sid}"
+  end
+
+  def _event_types
+    res = "type="
+    res += ["videochat_roomleave_event",
+            "videochat_roomjoin_event"].join ','
+  end
 end
 
 class Poller
@@ -57,6 +145,7 @@ class Poller
   def initialize(application)
     @application = application
     @mutex = Mutex.new
+    @elp = UCLongPoller.new(application.encre)
   end
 
   def videostream_unmute_broadcast(metadatas)
@@ -144,7 +233,7 @@ class Poller
       end
     end
   end
-  
+
   def videostream_kicked_event(metadatas)
     $log.info "Kick subscriber event"
     @application.get_child_scope_names.each do |child_name|
@@ -167,34 +256,26 @@ class Poller
   end
 
   def execute(service)
-    if @mutex.try_lock
-      begin
-        events = ApiEvent.all
-        if events
-          events_ids = events.map {|x| x.id}
-          ApiEvent.delete(events_ids)
-          events.each do |x|
-            $log.info "Received a json event via db"
-            $log.info "#{x.id} :: #{x.event}"
-            result = JSON.parse(x.event)
-            $log.info "Event type: #{result['event']['type']}"
-            if self.class.method_defined? result['event']['type'] #&& result['event']['metadatas']
-              $log.info "Event found."
-              $log.info "Metadatas : (#{result['event']['metadatas']})"
-              send(result['event']['type'], result['event']['metadatas'])
-            else
-              $log.info "No event or metadata found."
-            end
-          end
+    begin
+      events = @elp.events
+
+      events.each do |e|
+        $log.info "Received a json event from ucengine"
+        $log.info e
+        $log.info "Event type: #{e['type']}"
+        if self.class.method_defined? e['type']
+          $log.info "Event found."
+          $log.info "Metadatas : (#{e['metadatas']})"
+          send(e['type'], e['metadatas'])
+        else
+          $log.info "No event or metadata found."
         end
-      rescue
-        $log.error $!
       end
-      @mutex.unlock
+    rescue
+      puts "Error in ScheduledService : #{$!}"
+      puts $!.backtrace
     end
   end
-  
-
 
 end
 end

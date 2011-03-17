@@ -42,7 +42,7 @@ require 'encre_stream'
 
 #logger
 require 'logger'
-options = YAML::load_file APP_ROOT + '/api/platform.yml'
+options = YAML::load_file APP_ROOT + '/platform.yml'
 options[:logger] = STDOUT if options[:logger] == "STDOUT" || !options[:logger]
 $log = Logger.new(options[:logger])
 if (Logger::Severity::const_defined? options[:loglvl].upcase)
@@ -70,7 +70,7 @@ end
 class Application < Red5::MultiThreadedApplicationAdapter
   #include Red5::IStreamAwareScopeHandler
 
-  attr_reader :appScope, :serverStream, :subscriber
+  attr_reader :appScope, :serverStream, :subscriber, :encre
   attr_writer :appScope, :serverStream, :subscriber
 
   def initialize
@@ -78,7 +78,7 @@ class Application < Red5::MultiThreadedApplicationAdapter
     super
 
     $log.info "Initializing ENCRE VideoChat v1..."
-    options = YAML::load_file APP_ROOT + '/api/platform.yml'
+    options = YAML::load_file APP_ROOT + '/platform.yml'
     $log.debug "options : #{options}"
     @encre = Encre::Platform::connect options
     @subscriber = Subscriber.new

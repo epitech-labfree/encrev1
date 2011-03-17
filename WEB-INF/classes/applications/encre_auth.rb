@@ -107,7 +107,7 @@ module Encre
       request_url += "?uid=#{@conf.uid}&sid=#{@conf.sid}"
       $log.info "Request filename : #{request_url}"
       response = RestClient.put request_url, ""
-      $log.info "--> Got reponse : #{respone}"
+      $log.info "--> Got reponse : #{response}"
       file_name = JSON.parse(response.to_str)['result']
       if file_name
         $log.info "--> Got filename : #{file_name}"
@@ -124,7 +124,7 @@ module Encre
     rescue
       file_name = nil
       $log.info "... failed ! (check exception below)"
-      $log.info $!      
+      $log.info $!
     end
 
 
@@ -136,7 +136,7 @@ module Encre
       e = { :type => "" }
       e.merge! event
 
-      request_url = "#{@url}/event/demo?"
+      request_url = "#{@url}/event/#{event[:room]}?"
       request_url += "uid=#{@conf.uid}&sid=#{@conf.sid}"
       request_url += "&" + e.url_encode
       $log.info "Sending an event to encre: #{request_url}"
@@ -192,12 +192,12 @@ module Encre
         return false
       end
     end
-    
+
     def server_disconnect(conn)
       if conn.get_client.has_attribute('user_uid') && conn.get_client.has_attribute('user_sid')
         user_uid = conn.get_client.get_attribute('user_uid').to_s
         user_sid = conn.get_client.get_attribute('user_sid').to_s
-        
+
         event(:type => 'videochat_serverdisconnect_event', :user_uid => user_uid, :user_sid => user_sid)
       else
         return false
@@ -209,7 +209,7 @@ module Encre
       if conn.get_client.has_attribute('user_uid') && conn.get_client.has_attribute('user_sid')
         user_uid = conn.get_client.get_attribute('user_uid').to_s
         user_sid = conn.get_client.get_attribute('user_sid').to_s
-        
+
         event(:type => 'videochat_roomjoin_event',
               :user_uid => user_uid, :user_sid => user_sid,
               :path => scope.get_path, :room => scope.get_name)
@@ -217,13 +217,13 @@ module Encre
         return false
       end
     end
-    
+
     def room_leave(client, scope)
       conn = Java::OrgRed5ServerApi::Red5::get_connection_local
       if conn.get_client.has_attribute('user_uid') && conn.get_client.has_attribute('user_sid')
         user_uid = conn.get_client.get_attribute('user_uid').to_s
         user_sid = conn.get_client.get_attribute('user_sid').to_s
-        
+
         event(:type => 'videochat_roomleave_event',
               :user_uid => user_uid, :user_sid => user_sid,
               :path => scope.get_path, :room => scope.get_name)
@@ -295,7 +295,7 @@ module Encre
         return false
       end
     end
-    
+
     def stream_auth(scope, name, type)
       # check scope
       # FIXME Check from threading issues.
@@ -303,7 +303,7 @@ module Encre
       if conn.get_client.has_attribute('user_uid') && conn.get_client.has_attribute('user_sid')
         user_uid = conn.get_client.get_attribute('user_uid').to_s
         user_sid = conn.get_client.get_attribute('user_sid').to_s
-        
+
         auth(user = {:uid => user_uid, :sid => user_sid }, type, scope.get_name)
       else
         return false
@@ -327,13 +327,13 @@ module Encre
       if conn.get_client.has_attribute('user_uid') && conn.get_client.has_attribute('user_sid')
         user_uid = conn.get_client.get_attribute('user_uid').to_s
         user_sid = conn.get_client.get_attribute('user_sid').to_s
-        
+
         auth(user = {:uid => user_uid, :sid => user_sid }, 'videochat_streamrecorded', stream.get_scope.get_name)
       else
         return false
       end
     end
-    
+
   end
 end
 

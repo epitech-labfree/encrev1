@@ -13,7 +13,6 @@
       %noscript
         %object(classid='clsid:D27CDB6E-AE6D-11cf-96B8-444553540000' id='vidpublish')
           %param
-          %param(name='quality' value='high')
           %param(name='server' value="#{params[:server]}")
           %embed(src="vidpublish.swf?streamtype=live&server=#{@full_url}&uid=#{params[:uid]}&sid=#{params[:sid]}")
 

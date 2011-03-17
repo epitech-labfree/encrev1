@@ -333,7 +333,6 @@ module Encre
         return false
       end
     end
-
   end
 end
 

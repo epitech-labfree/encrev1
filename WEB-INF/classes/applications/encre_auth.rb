@@ -89,7 +89,7 @@ module Encre
       @conf = conf
       @auth = Encre::Auth.new(@conf)
       @event = Encre::Event.new(@conf)
-#      @file = Encre::File.new(@conf)
+      # @file = Encre::File.new(@conf)
     end
   end
 
@@ -182,7 +182,7 @@ module Encre
     end
 
     def server_connect(conn)
-      $log.info "server connect event\n\n"
+      $log.debug "Server connect event"
       if conn.get_client.has_attribute('user_sid') && conn.get_client.has_attribute('user_sid')
         user_uid = conn.get_client.get_attribute('user_uid').to_s
         user_sid = conn.get_client.get_attribute('user_sid').to_s
@@ -255,33 +255,30 @@ module Encre
         $log.info "... failed ! (check exception below)"
         $log.info $!
       end
-
       @conf.sid
     end
 
     def auth(user, event_type, scope)
-      $log.debug " Getting uid #{user[:uid]} and sid #{user[:sid]}"
-      # request = "#{@url}/token/#{@conf.token}/isvalid?"
-      # request += "token=#{client_token}"
-      # request += "&type=#{event_type}"
-      # request += "&scope=#{scope}"
-      # Currently not implemented/documented by Encre platform.
-      # Will be available soon, with a new semantic
-      # puts "Executing this request : #{request}."
-      # response = RestClient.get request
-      # puts "--> Got response: #{response}"
-      # return false if JSON.parse(response.to_str).has_key? 'error'
+      $log.info "Checking user uid : [#{user[:uid]}] sid : [#{user[:sid]}]"
+      request = "#{@url}/user/#{user[:uid]}"
+      request += "?uid=#{user[:uid]}"
+      request += "&sid=#{user[:sid]}"
+      $log.info "Executing this request : #{request}"
+      response = RestClient.get request
+      $log.info "--> Got response: #{response}"
+      return false if JSON.parse(response.to_str).has_key? 'error'
       true
+    rescue => error
+      $log.info "Request error : #{error.response}"
+      false
     end
 
-    def connection(conn, params)
+    def connection(conn, user)
       ## get /info
-      user_uid = params[0][0].to_s.delete '[]'
-      user_sid = params[0][1].to_s.delete '[]'
-      $log.debug " Getting uid #{user_uid} and sid #{user_sid}"
-      conn.get_client.set_attribute('user_uid', user_uid)
-      conn.get_client.set_attribute('user_sid', user_sid)
-      auth(user = {:uid => user_uid, :sid => user_sid }, 'videochat_connect', '')
+      $log.debug " Getting uid #{user[:uid]} and sid #{user[:sid]}"
+      conn.get_client.set_attribute('user_uid', user[:uid])
+      conn.get_client.set_attribute('user_sid', user[:sid])
+      auth(user, 'videochat_connect', '')
     end
 
     def join(client, scope)
@@ -290,9 +287,7 @@ module Encre
       if conn.get_client.has_attribute('user_uid') && conn.get_client.has_attribute('user_sid')
         user_uid = conn.get_client.get_attribute('user_uid').to_s
         user_sid = conn.get_client.get_attribute('user_sid').to_s
-          auth(user = {:uid => user_uid, :sid => user_sid }, 'videochat_join', scope.get_name)
-      else
-        return false
+      return auth(user = {:uid => user_uid, :sid => user_sid }, 'videochat_join', scope.get_name)
       end
     end
     

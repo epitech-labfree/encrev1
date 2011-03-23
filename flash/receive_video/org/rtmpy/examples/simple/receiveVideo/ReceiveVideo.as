@@ -395,6 +395,9 @@ package org.rtmpy.examples.simple.receiveVideo
       _rtmpURL = getparam('server');
       _encre_uid = getparam('uid', 'I_did_not_supplied_any_uid_but_i_should_have');
       _encre_sid = getparam('sid', 'I_did_not_supplied_any_sid_but_i_should_have');
+      // connection.connect(getparam('server'), getparam('uid', 'I_did_not_supply_a_uid'), getparam('sid', 'I_did_not_supply_a_sid'));
+      // trace("made connection " + getparam('server') + " with uid " + getparam('uid', 'I_did_not_supply_a_uid') + "and sid" + getparam('sid', 'I_did_not_supply_a_sid'));
+
       trace(String(_rtmpURL));
       trace(String(_encre_uid));
       trace(String(_encre_sid));

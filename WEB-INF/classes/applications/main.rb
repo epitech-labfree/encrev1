@@ -118,9 +118,15 @@ class Application < Red5::MultiThreadedApplicationAdapter
       $log.error "Didn't supplied the necessary parameters (connect(url, uid, sid);)"
       return false;
     end
-    $log.info "\tUid:#{params[0][0].to_s}"
-    $log.info "\tSid:#{params[0][1].to_s}"
-
+    if (params.length == 1)
+      $log.info "\tUid:#{params[0][0].to_s}"
+      $log.info "\tSid:#{params[0][1].to_s}"
+      user = {:uid => params[0][0].to_s, :sid => params[0][1].to_s }
+    else
+      $log.info "\tUid:#{params[0].to_s}"
+      $log.info "\tSid:#{params[1].to_s}"
+      user = {:uid => params[0].to_s, :sid => params[1].to_s }
+    end
     measureBandwidth(conn)
     if conn.instance_of?(Red5::IStreamCapableConnection)
       $log.info "Got stream capable connection"
@@ -131,7 +137,7 @@ class Application < Red5::MultiThreadedApplicationAdapter
       # conn.setBandwidthConfigure(sbc)
     end
 
-    if @encre.auth.connection(conn, params)
+    if @encre.auth.connection(conn, user)
       @encre.event.server_connect(conn)
       super(conn, params)
     else

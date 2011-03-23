@@ -30,6 +30,10 @@ package org.rtmpy.examples.simple.vidPublish
 
   public class VidPublish extends Application
   {
+    private var _rtmpURL		: String = "rtmp://localhost/encrev1";
+    private var _encre_sid		: String = "I_did_not_supplied_any_sid_but_i_should_have";
+    private var _encre_uid		: String = "I_did_not_supplied_any_uid_but_i_should_have";
+
     private var connection:NetConnection = null;
     private var stream:NetStream = null;
     private var camera:Camera = Camera.getCamera();
@@ -104,8 +108,16 @@ package org.rtmpy.examples.simple.vidPublish
 
       connection.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
       connection.objectEncoding = ObjectEncoding.AMF0;
-      connection.connect(getparam('server'), getparam('uid', 'I_did_not_supply_a_uid'), getparam('sid', 'I_did_not_supply_a_sid'));
-      trace("made connection " + getparam('server') + " with uid " + getparam('uid', 'I_did_not_supply_a_uid') + "and sid" + getparam('sid', 'I_did_not_supply_a_sid'));
+      // connection.connect(getparam('server'), getparam('uid', 'I_did_not_supply_a_uid'), getparam('sid', 'I_did_not_supply_a_sid'));
+      // trace("made connection " + getparam('server') + " with uid " + getparam('uid', 'I_did_not_supply_a_uid') + "and sid" + getparam('sid', 'I_did_not_supply_a_sid'));
+      _rtmpURL = getparam('server');
+      _encre_uid = getparam('uid', 'I_did_not_supplied_any_uid_but_i_should_have');
+      _encre_sid = getparam('sid', 'I_did_not_supplied_any_sid_but_i_should_have');
+
+      trace(String(_rtmpURL));
+      trace(String(_encre_uid));
+      trace(String(_encre_sid));
+      connection.connect(_rtmpURL, _encre_uid, _encre_sid);
 
       connected = true;
     }

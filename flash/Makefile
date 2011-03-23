@@ -23,6 +23,7 @@
 ##
 
 MXMLC		= $(FLEX_HOME)/bin/mxmlc
+MXML_OPTS	= -static-link-runtime-shared-libraries
 
 #TARGETS		= vidpublish.swf receivevideo.swf
 
@@ -32,11 +33,11 @@ flash: publish receive
 	cp -f receive_video/*.png public/images
 
 publish:
-	cd publish_video && $(MXMLC) vidpublish.mxml
+	cd publish_video && $(MXMLC) $(MXML_OPTS) vidpublish.mxml
 	cp -f publish_video/vidpublish.swf public/publish_video.swf
 
 receive:
-	cd receive_video && $(MXMLC) receiveVideo.mxml
+	cd receive_video && $(MXMLC) $(MXML_OPTS) receiveVideo.mxml
 	cp -f receive_video/receiveVideo.swf public/receive_video.swf
 
 clean:

@@ -243,12 +243,12 @@ Then, uou might want to add some users to ucengine to be able to use the compone
   ./bin/ucectl acl add --domain localhost --uid 'toto' --meeting 'test-meeting' --object 'roster' --action 'add'
   ./bin/ucectl acl add --domain localhost --uid 'tata' --meeting 'test-meeting' --object 'roster' --action 'add'
 
-You now have a really simple setup to be able to use the Encre video v1 component.
+And, since ucengine is not yet fully deterministic, you'll sometime need to add these acls:
 
-- ajouter un utilisateur pour red5 "encre-video" -> voir platform.yml
-- creer des utilisateurs de test (toto, tata)
-- cree un meeting de test "caca"
-- donne des droits d'acces au meeting a cet utilisateur (ucectl acl add -- ....) (voir la doc de ucengine, notamment les examples sur les acls)
+  ./bin/ucectl acl add --domain localhost --uid toto --object user --action get
+  ./bin/ucectl acl add --domain localhost --uid tata --object user --action get
+
+You now have a really simple setup to be able to use the Encre video v1 component.
 
 
 

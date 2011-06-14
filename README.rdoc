@@ -218,7 +218,7 @@ from the end)
 
 == Ucengine setup
 
-...
+=== v 0.3.0
 
 You first need to create an user for the encre-video component.
 
@@ -231,7 +231,7 @@ You first need to create an user for the encre-video component.
 
 Now update the api/platform.yml file with these informations. (edit the uid and token items, with the provided uid and credential)
 
-Then, uou might want to add some users to ucengine to be able to use the component, you will also need a meeting, and give some right on the meeting to these users.
+Then, you might want to add some users to ucengine to be able to use the component, you will also need a meeting, and give some right on the meeting to these users.
 
   ./bin/ucectl user add --domain localhost --uid toto --auth password --credential '123456'
   ./bin/ucectl user add --domain localhost --uid tata --auth password --credential '123456'
@@ -250,5 +250,31 @@ And, since ucengine is not yet fully deterministic, you'll sometime need to add 
 
 You now have a really simple setup to be able to use the Encre video v1 component.
 
+=== v 0.5.0
+
+You first need to create an user for the encre-video component.
+
+  ./bin/ucengine-admin user add --domain localhost --name encre-video --auth password --credential '123456'
+  ./bin/ucengine-admin role add --domain localhost --name encre-video
+  ./bin/ucengine-admin role access add --domain localhost --name encre-video --object presence --action add
+  ./bin/ucengine-admin role access add --domain localhost --name encre-video --object presence --action delete
+  ./bin/ucengine-admin role access add --domain localhost --name encre-video --object event --action list
+  ./bin/ucengine-admin role access add --domain localhost --name encre-video --object event --action get
+  ./bin/ucengine-admin role access add --domain localhost --name encre-video --object roster --action list
+  ./bin/ucengine-admin user role add --domain localhost --name encre-video --role encre-video
+
+Then, you might want to add some users to ucengine to be able to use the component, you will also need a meeting, and give some right on the meeting to these users.
+
+  ./bin/ucengine-admin meeting add --domain localhost --name 'test-meeting'
+  ./bin/ucengine-admin role add --domain localhost --name video-access
+  ./bin/ucengine-admin role access add --domain localhost --name video-access --object presence --action add
+  ./bin/ucengine-admin role access add --domain localhost --name video-access --object presence --action delete
+  ./bin/ucengine-admin role access add --domain localhost --name video-access --object 'roster' --action 'add' --meeting 'test-meeting'
+  ./bin/ucengine-admin role access add --domain localhost --name video-access --object 'roster' --action 'delete' --meeting 'test-meeting'
+  ./bin/ucengine-admin role access add --domain localhost --name video-access --object 'user' --action 'get'
 
 
+  ./bin/ucengine-admin user add --domain localhost --name toto --auth password --credential '123456'
+  ./bin/ucengine-admin user add --domain localhost --name tata --auth password --credential '123456'
+  ./bin/ucengine-admin user role add --domain localhost --name toto --role video-access
+  ./bin/ucengine-admin user role add --domain localhost --name tata --role video-access

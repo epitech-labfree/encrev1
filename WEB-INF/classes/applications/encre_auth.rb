@@ -243,8 +243,9 @@ module Encre
       $log.info "Authorizing from ENCRE server (#{scope.get_path}) on #{@url}/presence/#{@conf.uid} ..."
       $log.info "With uid : [#{@conf.uid}] and token : [#{@conf.token}]."
       begin
-        r = RestClient.post("#{@url}/presence?uid=#{@conf.uid}&credential=#{@conf.token}", '')
-        @conf.sid = JSON.parse(r.to_str)['result']
+        r = RestClient.post("#{@url}/presence?name=#{@conf.uid}&credential=#{@conf.token}", '')
+        @conf.sid = JSON.parse(r.to_str)['result']['sid']
+        @conf.uid = JSON.parse(r.to_str)['result']['uid']
         if @conf.sid
           $log.info "... Authorizarion sid is #{@conf.sid}"
         else

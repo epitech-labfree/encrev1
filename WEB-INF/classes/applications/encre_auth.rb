@@ -155,11 +155,13 @@ module Encre
         user_sid = conn.get_client.get_attribute('user_sid').to_s
         $log.info "Event stream : type -> #{type} user uid -> #{user_uid} and sid -> #{user_sid}"
         event(:type => type,
-              :user_uid => user_uid,
-              :user_sid => user_sid,
-              :path => stream.get_scope.get_path,
               :room => stream.get_scope.get_name,
-              :name => stream.get_published_name )
+              :metadata => {
+                :user_uid => user_uid,
+                :user_sid => user_sid,
+                :path => stream.get_scope.get_path,
+                :room => stream.get_scope.get_name,
+                :name => stream.get_published_name})
       else
         return false
       end

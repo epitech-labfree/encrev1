@@ -27,6 +27,7 @@ require 'java'
 require 'rubygems'
 require 'rest_client'
 require 'json'
+require 'uri'
 
 module Red5
   include_package "org.red5.server.api"
@@ -138,10 +139,15 @@ module Encre
 
       request_url = "#{@url}/event/#{event[:room]}?"
       request_url += "uid=#{@conf.uid}&sid=#{@conf.sid}"
-      request_url += "&" + e.url_encode
+      request_url += "&" + URI.escape(e.url_encode, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
       $log.info "Sending an event to encre: #{request_url}"
-      response = RestClient.post request_url, ""
-      $log.info "--> Got response : #{response}"
+      begin
+        response = RestClient.post request_url, ""
+        $log.info "--> Got response : #{response}"
+      rescue
+        $log.warn "Encre::Event.event: Rescued from exception #{$!}. Check trace below:"
+        $log.warn "#{$!.backtrace.join("\n")}"
+      end
 
       # The doc doesn't mention any error code or return value from this method
       true
@@ -260,18 +266,21 @@ module Encre
     end
 
     def auth(user, event_type, scope)
-      $log.info "Checking user uid : [#{user[:uid]}] sid : [#{user[:sid]}]"
-      request = "#{@url}/user/#{user[:uid]}"
-      request += "?uid=#{user[:uid]}"
-      request += "&sid=#{user[:sid]}"
-      $log.info "Executing this request : #{request}"
-      response = RestClient.get request
-      $log.info "--> Got response: #{response}"
-      return false if JSON.parse(response.to_str).has_key? 'error'
-      true
-    rescue => error
-      $log.info "Request error : #{error.response}"
-      false
+      begin
+        $log.info "Checking user uid : [#{user[:uid]}] sid : [#{user[:sid]}]"
+        request = "#{@url}/user/#{user[:uid]}"
+        request += "?uid=#{user[:uid]}"
+        request += "&sid=#{user[:sid]}"
+        $log.info "Executing this request : #{request}"
+        response = RestClient.get request
+        $log.info "--> Got response: #{response}"
+        return false if JSON.parse(response.to_str).has_key? 'error'
+        true
+      rescue
+        $log.warn "Request error : #{$!}, Check trace below"
+        $log.warn "#{$!.backtrace.join("\n")}"
+        false
+      end
     end
 
     def connection(conn, user)

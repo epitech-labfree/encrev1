@@ -401,7 +401,7 @@ package org.rtmpy.examples.simple.receiveVideo
       trace(String(_rtmpURL));
       trace(String(_encre_uid));
       trace(String(_encre_sid));
-      connection.connect(_rtmpURL, _encre_uid, _encre_sid);
+      connection.connect(_rtmpURL, new Array(_encre_uid, _encre_sid));
       connected = true;
     }
 
